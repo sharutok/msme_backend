@@ -12,10 +12,12 @@ exports.sendData = async (req, res) => {
   };
   try {
     await model.vendor_master.create(data).then((result) => {
-      res.json({
-        message: "created",
-        result,
-      });
+      res.json([
+        { message: "created" },
+        {
+          result,
+        },
+      ]);
     });
   } catch (error) {
     error.errors.map((x) => {
@@ -38,8 +40,25 @@ exports.seeData = async (req, res) => {
         message: `there is no supplier id of '${id}' exist!!!`,
       });
     } else {
+      const {
+        supplier_number,
+        organization,
+        supplier_name,
+        type,
+        created_date,
+        inactive_date,
+      } = data;
       res.json({
-        data,
+        result: [
+          {
+            supplier_number,
+            organization,
+            supplier_name,
+            type,
+            created_date,
+            inactive_date,
+          },
+        ],
       });
     }
   } catch (error) {
