@@ -10,12 +10,19 @@ exports.sendData = async (req, res) => {
     created_date: req.body.created_date,
     inactive_date: req.body.inactive_date,
   };
-
   try {
-    await model.vendor_master.create(data);
-    res.json([{ message: "ok", data }]);
+    await model.vendor_master.create(data).then((result) => {
+      res.json({
+        message: "created",
+        result,
+      });
+    });
   } catch (error) {
-    res.json({ message: "not ok" });
+    error.errors.map((x) => {
+      res.json({
+        message: x.message,
+      });
+    });
   }
 };
 
@@ -26,13 +33,19 @@ exports.seeData = async (req, res) => {
     const data = await model.vendor_master.findOne({
       where: { supplier_number: id },
     });
-    res.json([
-      {
+    if (data === null) {
+      res.json({
+        message: `there is no supplier id of '${id}' exist!!!`,
+      });
+    } else {
+      res.json({
         data,
-      },
-    ]);
+      });
+    }
   } catch (error) {
-    res.json({ messgae: `not there` });
+    res.json({
+      message: error,
+    });
   }
 };
 
@@ -40,27 +53,26 @@ exports.seeData = async (req, res) => {
 exports.updateData = async (req, res) => {
   const id = req.params.id;
   const data = {
-    supplier_number: req.body.supplier_number,
+    supplier_number: req.params.id,
     organization: req.body.organization,
     supplier_name: req.body.supplier_name,
     type: req.body.type,
     created_date: req.body.created_date,
     inactive_date: req.body.inactive_date,
   };
-
-  try {
-    const UpdatedData = await model.vendor_master.update(data, {
-      where: { id },
-    });
-    res.json([
-      {
-        message: "updated data",
-        UpdatedData,
-      },
-    ]);
-  } catch (error) {
+  const isSupplier_id = await model.vendor_master.findOne({
+    where: { supplier_number: id },
+  });
+  if (isSupplier_id === null) {
     res.json({
-      message: "something wrong.....",
+      message: `there is no supplier id of '${id}' exist!!!`,
+    });
+  } else {
+    const UpdatedData = await model.vendor_master.update(data, {
+      where: { supplier_number: id },
+    });
+    res.json({
+      UpdatedData,
     });
   }
 };
@@ -68,14 +80,18 @@ exports.updateData = async (req, res) => {
 //DELETE
 exports.deleteData = async (req, res) => {
   const id = req.params.id;
-  try {
-    await model.vendor_master.destroy({ where: { id } });
+  const isSupplier_id = await model.vendor_master.findOne({
+    where: { supplier_number: id },
+  });
+
+  if (isSupplier_id === null) {
+    res.json({
+      message: `there is no supplier id of '${id}' exist!!!`,
+    });
+  } else {
+    model.vendor_master.destroy({ where: { supplier_number: id } });
     res.json({
       message: "deleted",
-    });
-  } catch (error) {
-    res.json({
-      message: "Something wrong.....",
     });
   }
 };

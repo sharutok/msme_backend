@@ -9,7 +9,8 @@ const vendor = express.Router();
 vendor
   .route("/vendor/:id")
   .get(seeData)
-  .post(sendData)
+
   .patch(updateData)
   .delete(deleteData);
+vendor.route("/vendor").post(sendData);
 module.exports = vendor;
