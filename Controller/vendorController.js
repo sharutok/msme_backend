@@ -36,7 +36,8 @@ exports.seeData = async (req, res) => {
       where: { supplier_number: id },
     });
     if (data === null) {
-      res.json({
+      res.status(404).json({
+        status: 404,
         message: `there is no supplier id of '${id}' exist!!!`,
       });
     } else {
@@ -48,7 +49,8 @@ exports.seeData = async (req, res) => {
         created_date,
         inactive_date,
       } = data;
-      res.json({
+      res.status(200).json({
+        status: 200,
         result: [
           {
             supplier_number,
@@ -62,7 +64,7 @@ exports.seeData = async (req, res) => {
       });
     }
   } catch (error) {
-    res.json({
+    res.status(404).json({
       message: error,
     });
   }
