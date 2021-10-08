@@ -21,7 +21,7 @@ exports.sendData = async (req, res) => {
     });
   } catch (error) {
     error.errors.map((x) => {
-      res.json({
+      res.status(404).json({
         message: x.message,
       });
     });
@@ -85,13 +85,14 @@ exports.updateData = async (req, res) => {
     where: { supplier_number: id },
   });
   if (isSupplier_id === null) {
-    res.json({
+    res.status(400).json({
       message: `there is no supplier id of '${id}' exist!!!`,
     });
   } else {
     const UpdatedData = await model.vendor_master.update(data, {
       where: { supplier_number: id },
     });
+    console.log(UpdatedData);
     res.json({
       UpdatedData,
     });
@@ -106,7 +107,7 @@ exports.deleteData = async (req, res) => {
   });
 
   if (isSupplier_id === null) {
-    res.json({
+    res.status(400).json({
       message: `there is no supplier id of '${id}' exist!!!`,
     });
   } else {
