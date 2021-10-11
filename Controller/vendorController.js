@@ -85,14 +85,16 @@ exports.updateData = async (req, res) => {
     where: { supplier_number: id },
   });
   if (isSupplier_id === null) {
+    console.log("id no match");
     res.status(400).json({
       message: `there is no supplier id of '${id}' exist!!!`,
     });
   } else {
+    console.log("id matched");
     const UpdatedData = await model.vendor_master.update(data, {
       where: { supplier_number: id },
     });
-    console.log(UpdatedData);
+    console.log("update");
     res.json({
       UpdatedData,
     });
