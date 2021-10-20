@@ -13,18 +13,73 @@ module.exports = (sequelize, DataTypes) => {
   }
   vendor_master.init(
     {
-      supplier_number: { type: DataTypes.STRING, unique: true },
-      organization: {
-        type: DataTypes.TEXT,
-        allowNull: false,
+      supplier_number: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
-      supplier_name: { type: DataTypes.TEXT, allowNull: false },
-      type: { type: DataTypes.TEXT, allowNull: false },
-      created_date: { type: DataTypes.STRING, allowNull: false },
-      inactive_date: { type: DataTypes.STRING, allowNull: false },
+      organization: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      supplier_name: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      created_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      inactive_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      classification: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      certificate_no: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      certificate_agency: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      certificate_expiration_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      certificate_registration_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: true,
+        validate: {
+          customValidators(value) {
+            if (value === "") {
+              this.status = "Pending";
+            }
+          },
+        },
+      },
+      vendor_email: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+          isEmail: true,
+        },
+      },
     },
     {
       sequelize,
+      tableName: "vendor_master",
       modelName: "vendor_master",
     }
   );
