@@ -1,5 +1,6 @@
 const { vendor_master } = require("../models");
-
+const sequelize = require("sequelize");
+const Op = sequelize.Op;
 //POST/SEND DATA
 exports.sendData = async (req, res) => {
   const data = {
@@ -204,10 +205,37 @@ exports.vendorStatus = async (req, res) => {
 
 exports.smartSearch = async (req, res) => {
   const searchVariable = req.params.searchVariable;
-  console.log(searchVariable);
-  const searchResult = await vendor_master.findAll({
-    where: { star: searchVariable },
-  });
+  try {
+    const searchResult = await vendor_master.findAll({
+      where: {
+        [Op.or]: [
+          {
+            supplier_number: {
+              [Op.like]: `%${searchVariable}%`,
+            },
+          },
+          {
+            organization: {
+              [Op.like]: `%${searchVariable}%`,
+            },
+          },
+          {
+            supplier_name: {
+              [Op.like]: `%${searchVariable}%`,
+            },
+          },
+        ],
+      },
+    });
+    res.status(200).json({
+      length: searchResult.length,
+      result: searchResult,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "something went wromg......",
+    });
+  }
 };
 
 // //POST-UPLOAD IMG
