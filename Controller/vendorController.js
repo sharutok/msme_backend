@@ -1,6 +1,8 @@
 const { vendor_master } = require("../models");
 const sequelize = require("sequelize");
 const Op = sequelize.Op;
+const sendEmail = require("../email");
+
 //POST/SEND DATA
 exports.sendData = async (req, res) => {
   const data = {
@@ -17,6 +19,7 @@ exports.sendData = async (req, res) => {
     certificate_registration_date: req.body.certificate_registration_date,
     vendor_email: req.body.vendor_email,
     status: req.body.status,
+    remarks: req.body.remarks
   };
   const id = req.params.id;
   try {
@@ -79,6 +82,7 @@ exports.seeData = async (req, res) => {
         certificate_registration_date,
         status,
         vendor_email,
+        remarks
       } = data;
       res.status(200).json({
         status: 200,
@@ -97,6 +101,7 @@ exports.seeData = async (req, res) => {
             certificate_expiration_date,
             certificate_registration_date,
             vendor_email,
+            remarks
           },
         ],
       });
@@ -135,6 +140,7 @@ exports.updateData = async (req, res) => {
     certificate_registration_date: req.body.certificate_registration_date,
     status: req.body.status,
     vendor_email: req.body.vendor_email,
+    remarks: req.body.remarks
   };
 
   const isSupplier_id = await vendor_master.findOne({
@@ -224,6 +230,17 @@ exports.smartSearch = async (req, res) => {
               [Op.like]: `%${searchVariable}%`,
             },
           },
+          ///MSME NO
+          {
+            certificate_no: {
+              [Op.like]: `%${searchVariable}%`,
+            },
+          },
+          {
+            status: {
+              [Op.like]: `%${searchVariable}%`,
+            },
+          },
         ],
       },
     });
@@ -238,16 +255,30 @@ exports.smartSearch = async (req, res) => {
   }
 };
 
-// //POST-UPLOAD IMG
-// exports.uploadImgfile = async (req, res) => {
-//   if (req.files === null) {
-//     return res.status(400).json({ mesg: "no file uploaded" });
-//   }
-//   const file = req.files.file;
-//   file.mv(`${__dirname}`, (err) => {
-//     if (err) {
-//       console.log(err);
-//       return res.statusl;
-//     }
-//   });
-// };
+//POST-SEND EMAIL
+exports.sendEmail = async (req, res) => {
+  const vendor_email = req.body.vendor_email;
+  const supplier_number = req.body.supplier_number;
+  const portalLink = req.body.portal_link;
+
+  console.log(vendor_email, supplier_number, portalLink);
+  try {
+    await sendEmail({
+      email: vendor_email,
+      subject: "Test Subject",
+      message: `Dear Vendor,
+      Please Click ${portalLink} and fill in the required details along with uploading of certificate.
+      
+                                      
+      `,
+    });
+    res.json({
+      message: `send to email ${vendor_email}`,
+    });
+  } catch (error) {
+    res.json({
+      message: `something went wrong`,
+      error,
+    });
+  }
+};

@@ -10,7 +10,8 @@ module.exports = {
       },
       supplier_number: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: false,
+        unique: true,
       },
       organization: {
         type: Sequelize.STRING,
@@ -63,6 +64,19 @@ module.exports = {
         validate: {
           isEmail: true,
         },
+      },
+      delete_flag: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
+      }
+      ,
+      isMSME_flag: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: true
+      },
+      remarks: {
+        type: Sequelize.STRING,
+
       },
       createdAt: {
         allowNull: false,

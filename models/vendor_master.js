@@ -76,6 +76,19 @@ module.exports = (sequelize, DataTypes) => {
           isEmail: true,
         },
       },
+      delete_flag: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      }
+      ,
+      isMSME_flag: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+      },
+      remarks: {
+        type: DataTypes.STRING,
+
+      }
     },
     {
       sequelize,

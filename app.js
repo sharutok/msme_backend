@@ -1,19 +1,21 @@
 const express = require("express");
 const app = express();
 const vendor = require("../Backend/Router/vendorRoute");
-const fileUpload = require("express-fileupload");
-const { sequelize } = require("./models");
-const cors = require("cors");
 const fileUploadRoute = require("./Router/fileUploadRoute");
+const SignInRouter = require("./Router/SignInRouter");
+const fileUpload = require("express-fileupload");
+
+const cors = require("cors");
+
 app.use(cors());
 app.use(fileUpload());
 app.use(express.json());
 
-// const main = async () => {
-//   await sequelize.sync({ force: true });
-// };
-// main();
-
+// app.use((req, res, next) => {
+//   console.log(req.headers);
+//   next();
+// });
 app.use("/", vendor);
-app.use("/file_upload", fileUploadRoute);
+app.use("/file-upload", fileUploadRoute);
+app.use("/login", SignInRouter);
 module.exports = app;
