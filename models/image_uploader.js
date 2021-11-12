@@ -18,24 +18,30 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
-      img_1_name: {
+      img_1_name: {//MSME Certificate
+
         type: DataTypes.STRING,
       },
       img_1_data: {
         type: DataTypes.BLOB('long'),
       },
-      img_2_name: {
+      img_2_name: {//GST Certificate
+
         type: DataTypes.STRING,
       },
       img_2_data: {
         type: DataTypes.BLOB('long'),
       },
-      img_3_name: {
+      img_3_name: { //PAN Card
         type: DataTypes.STRING,
       },
       img_3_data: {
         type: DataTypes.BLOB('long'),
       },
+      delete_flag: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      }
     },
     {
       sequelize,

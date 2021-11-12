@@ -11,23 +11,27 @@ module.exports = {
       supplier_number: {
         type: Sequelize.STRING,
       },
-      img_1_name: {
+      img_1_name: {     //MSME Certificate
         type: Sequelize.STRING,
       },
       img_1_data: {
         type: Sequelize.BLOB('long'),
       },
-      img_2_name: {
+      img_2_name: {     //GST Certificate
         type: Sequelize.STRING,
       },
       img_2_data: {
         type: Sequelize.BLOB('long'),
       },
-      img_3_name: {
+      img_3_name: {     //PAN Card
         type: Sequelize.STRING,
       },
       img_3_data: {
         type: Sequelize.BLOB('long'),
+      },
+      delete_flag: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,

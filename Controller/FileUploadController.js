@@ -13,11 +13,11 @@ exports.uploadFileImgPost = async (req, res) => {
   const data = {
     supplier_number: id,
     img_1_name: `${arr[0].name}/${id}`,
-    img_1_data: arr[0].data || "0",
+    img_1_data: arr[0].data,
     img_2_name: `${arr[1].name}/${id}`,
-    img_2_data: arr[1].data || "0",
+    img_2_data: arr[1].data,
     img_3_name: `${arr[2].name}/${id}`,
-    img_3_data: arr[2].data || "0",
+    img_3_data: arr[2].data,
   };
   console.log(data);
   const isImage = await image_uploader.findOne({
@@ -47,18 +47,24 @@ exports.uploadFileImgPost = async (req, res) => {
 };
 
 //DELETE IMG 
-exports.deleteImg1 = async (req, res) => {
-
-  const { supplier_number } = req.params
-  if (supplier_number) {
+exports.deleteImg = async (req, res) => {
+  const { id } = req.params
+  if (id) {
     try {
-      await image_uploader.destroy({ where: { supplier_number } })
-    } catch (error) {
+      await image_uploader.update({ delete_flag: true }, { where: { supplier_number: id } })
       return res.json({
+        deleted
+      })
+    } catch (error) {
+      return res.status(404).json({
         error,
       });
     }
-
+  }
+  else {
+    return res.status(404).json({
+      message: "no supplier no exist!!"
+    });
   }
 
 }

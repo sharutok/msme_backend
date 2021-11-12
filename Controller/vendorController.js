@@ -115,7 +115,9 @@ exports.seeData = async (req, res) => {
 
 //GET ALL VANDERS
 exports.allVendor = async (req, res) => {
-  const allVendor = await vendor_master.findAll();
+  const allVendor = await vendor_master.findAll(
+    { where: { delete_flag: false } }
+  );
 
   res.status(201).json({
     length: allVendor.length,
@@ -175,7 +177,7 @@ exports.deleteData = async (req, res) => {
       message: `there is no supplier id of '${id}' exist!!!`,
     });
   } else {
-    vendor_master.destroy({ where: { supplier_number: id } });
+    await vendor_master.update({ delete_flag: true }, { where: { supplier_number: id } });
     res.json({
       message: "deleted",
     });
@@ -269,7 +271,6 @@ exports.sendEmail = async (req, res) => {
       message: `Dear Vendor,
       Please Click ${portalLink} and fill in the required details along with uploading of certificate.
       
-                                      
       `,
     });
     res.json({
