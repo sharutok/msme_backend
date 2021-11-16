@@ -187,16 +187,17 @@ exports.deleteData = async (req, res) => {
 //GET STATUS ACCEPTED OR PENDING
 exports.vendorStatus = async (req, res) => {
   const status = req.params.status;
+
   try {
-    const isStatus = await vendor_master.findAll({ where: { status } });
-    if (isStatus === "Approved" || isStatus === "approved")
-      console.log("in approved");
-    res.status(200).json({
-      result_for: status,
-      result: isStatus.length,
-      isStatus,
-    });
-    if (isStatus === "Pending" || isStatus === "pending")
+    const isStatus = await vendor_master.findAll({ where: { status, delete_flag: false } });
+    if (status === "Approved" || status === "approved")
+      // console.log("in approved");
+      res.status(200).json({
+        result_for: status,
+        result: isStatus.length,
+        isStatus,
+      });
+    if (status === "Pending" || status === "pending")
       res.status(200).json({
         result_for: status,
         result: isStatus.length,
@@ -283,3 +284,32 @@ exports.sendEmail = async (req, res) => {
     });
   }
 };
+
+//DATA FOR TODAY 
+exports.dataForToday = async (req, res) => {
+  const TODAY_START = new Date().setHours(0, 0, 0, 0);
+  const NOW = new Date();
+  try {
+    const dataToday = await vendor_master.findAll({
+      where: {
+        createdAt: {
+          [Op.gt]: TODAY_START,
+          [Op.lt]: NOW
+        }
+      }
+    });
+
+    res.json({
+      length: dataToday.length,
+      data: {
+        dataToday
+      }
+
+    })
+  } catch (error) {
+    res.json({
+      message: `something went wrong`
+    })
+  }
+
+}
