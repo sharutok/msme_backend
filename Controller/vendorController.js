@@ -113,10 +113,10 @@ exports.seeData = async (req, res) => {
   }
 };
 
-//GET ALL VANDERS
+//GET ALL VENDERS
 exports.allVendor = async (req, res) => {
   const allVendor = await vendor_master.findAll(
-    { where: { delete_flag: false } }
+    { where: { delete_flag: false, isMSME_flag: true } }
   );
 
   res.status(201).json({
@@ -271,6 +271,7 @@ exports.sendEmail = async (req, res) => {
       subject: "Test Subject",
       message: `Dear Vendor,
       Please Click ${portalLink} and fill in the required details along with uploading of certificate.
+      Your Vendor Number is : ${supplier_number}
       
       `,
     });
@@ -313,3 +314,4 @@ exports.dataForToday = async (req, res) => {
   }
 
 }
+
