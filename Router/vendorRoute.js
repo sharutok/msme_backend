@@ -10,7 +10,6 @@ const {
   sendEmail,
   dataForToday,
 } = require("../Controller/vendorController");
-const { protect } = require("../Controller/SignInController");
 const vendor = express.Router();
 
 vendor

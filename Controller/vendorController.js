@@ -1,11 +1,12 @@
-const { vendor_master } = require("../models");
+const { vendor_master, vendor_master2 } = require("../models");
+
 const sequelize = require("sequelize");
 const Op = sequelize.Op;
 const sendEmail = require("../email");
 
-//POST/SEND DATA
+//POST DATA 
 exports.sendData = async (req, res) => {
-  const data = {
+  let data = {
     supplier_number: req.params.id,
     organization: req.body.organization,
     supplier_name: req.body.supplier_name,
@@ -21,6 +22,7 @@ exports.sendData = async (req, res) => {
     status: req.body.status,
     remarks: req.body.remarks
   };
+
   const id = req.params.id;
   try {
     const findData = await vendor_master.findOne({
@@ -29,14 +31,9 @@ exports.sendData = async (req, res) => {
 
     if (findData === null) {
       try {
-        await vendor_master.create(data).then((result) => {
-          res.json([
-            { message: "created" },
-            {
-              result,
-            },
-          ]);
-        });
+
+        await vendor_master.create(data)
+
       } catch (error) {
         res.status(404).json({
           message: error,
@@ -55,13 +52,14 @@ exports.sendData = async (req, res) => {
   }
 };
 
-// GET VENDOR USING SUPPLIER_NO
+// SEE DATA FOR GIVEN VENDOR NO
 exports.seeData = async (req, res) => {
   const id = req.params.id;
   try {
     const data = await vendor_master.findOne({
       where: { supplier_number: id },
     });
+
     if (data === null) {
       res.status(404).json({
         status: 404,
@@ -70,38 +68,35 @@ exports.seeData = async (req, res) => {
     } else {
       const {
         supplier_number,
-        organization,
         supplier_name,
+        organization,
         type,
-        created_date,
-        inactive_date,
-        classification,
         certificate_no,
+        created_date,
         certificate_agency,
         certificate_expiration_date,
         certificate_registration_date,
-        status,
         vendor_email,
-        remarks
+        remarks, status, delete_flag, isMSME_flag
       } = data;
       res.status(200).json({
         status: 200,
         result: [
           {
             supplier_number,
-            organization,
             supplier_name,
+            organization,
             type,
-            status,
             certificate_no,
             created_date,
-            inactive_date,
-            classification,
             certificate_agency,
             certificate_expiration_date,
             certificate_registration_date,
             vendor_email,
-            remarks
+            remarks,
+            status,
+            delete_flag,
+            isMSME_flag
           },
         ],
       });
@@ -109,40 +104,61 @@ exports.seeData = async (req, res) => {
   } catch (error) {
     res.status(404).json({
       message: error,
+      data: "unsuccessfull"
     });
   }
 };
 
 //GET ALL VENDERS
 exports.allVendor = async (req, res) => {
-  const allVendor = await vendor_master.findAll(
-    { where: { delete_flag: false, isMSME_flag: true } }
-  );
 
+  let allVendor = await vendor_master.findAll(
+    {
+      where: {
+        delete_flag: false,
+        // plant: {
+        //   [Op.like]: `%${plant}%`,
+        // }
+      }
+    }
+  );
   res.status(201).json({
     length: allVendor.length,
     allVendor,
-  });
+  })
+
+
+
 };
 
 //UPDATE VENDOR USING
 exports.updateData = async (req, res) => {
   const id = req.params.id;
+  const {
+    supplier_number,
+    supplier_name,
+    organization,
+    type,
+    certificate_no,
+    created_date,
+    certificate_agency,
+    certificate_expiration_date,
+    certificate_registration_date,
+    vendor_email,
+    remarks, status, delete_flag, isMSME_flag
+  } = req.body
   const data = {
-    supplier_number: req.body.supplier_number,
-    organization: req.body.organization,
-    supplier_name: req.body.supplier_name,
-    type: req.body.type,
-    created_date: req.body.created_date,
-    inactive_date: req.body.inactive_date,
-    classification: req.body.classification,
-    certificate_no: req.body.certificate_no,
-    certificate_agency: req.body.certificate_agency,
-    certificate_expiration_date: req.body.certificate_expiration_date,
-    certificate_registration_date: req.body.certificate_registration_date,
-    status: req.body.status,
-    vendor_email: req.body.vendor_email,
-    remarks: req.body.remarks
+    supplier_number,
+    supplier_name,
+    organization,
+    type,
+    certificate_no,
+    created_date,
+    certificate_agency,
+    certificate_expiration_date,
+    certificate_registration_date,
+    vendor_email,
+    remarks, status, delete_flag, isMSME_flag
   };
 
   const isSupplier_id = await vendor_master.findOne({
@@ -187,22 +203,13 @@ exports.deleteData = async (req, res) => {
 //GET STATUS ACCEPTED OR PENDING
 exports.vendorStatus = async (req, res) => {
   const status = req.params.status;
-
   try {
     const isStatus = await vendor_master.findAll({ where: { status, delete_flag: false } });
-    if (status === "Approved" || status === "approved")
-      // console.log("in approved");
-      res.status(200).json({
-        result_for: status,
-        result: isStatus.length,
-        isStatus,
-      });
-    if (status === "Pending" || status === "pending")
-      res.status(200).json({
-        result_for: status,
-        result: isStatus.length,
-        isStatus,
-      });
+    res.status(200).json({
+      result_for: status,
+      result: isStatus.length,
+      isStatus,
+    });
   } catch (error) {
     res.status(400).json({
       message: "something went wromg......",
@@ -214,6 +221,7 @@ exports.vendorStatus = async (req, res) => {
 
 exports.smartSearch = async (req, res) => {
   const searchVariable = req.params.searchVariable;
+  console.log(searchVariable);
   try {
     const searchResult = await vendor_master.findAll({
       where: {
@@ -239,11 +247,11 @@ exports.smartSearch = async (req, res) => {
               [Op.like]: `%${searchVariable}%`,
             },
           },
-          {
-            status: {
-              [Op.like]: `%${searchVariable}%`,
-            },
-          },
+          // {
+          //   status: {
+          //     [Op.like]: `%${searchVariable}%`,
+          //   },
+          // },
         ],
       },
     });
@@ -251,6 +259,7 @@ exports.smartSearch = async (req, res) => {
       length: searchResult.length,
       result: searchResult,
     });
+    console.log(searchResult);
   } catch (error) {
     res.status(400).json({
       message: "something went wromg......",

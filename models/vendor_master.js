@@ -15,79 +15,56 @@ module.exports = (sequelize, DataTypes) => {
     {
       supplier_number: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       organization: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       supplier_name: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       type: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       created_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      },
-      inactive_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      },
-      classification: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       certificate_no: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       certificate_agency: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       certificate_expiration_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
+        type: DataTypes.STRING,
       },
       certificate_registration_date: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      },
-      status: {
         type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: true,
-        validate: {
-          customValidators(value) {
-            if (value === "") {
-              this.status = "Pending";
-            }
-          },
-        },
       },
       vendor_email: {
         type: DataTypes.STRING,
-        allowNull: true,
-        validate: {
-          isEmail: true,
-        },
+        // validate: {
+        //   isEmail: true,
+        // },
+      },
+      remarks: {
+        type: DataTypes.STRING,
+      },
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: false,
+
       },
       delete_flag: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.STRING,
         defaultValue: false
       }
       ,
       isMSME_flag: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.STRING,
         defaultValue: true
       },
       remarks: {
         type: DataTypes.STRING,
-
       }
     },
     {

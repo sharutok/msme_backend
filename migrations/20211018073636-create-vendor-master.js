@@ -10,81 +10,63 @@ module.exports = {
       },
       supplier_number: {
         type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
       },
       organization: {
         type: Sequelize.STRING,
-        allowNull: true,
       },
       supplier_name: {
         type: Sequelize.STRING,
-        allowNull: true,
       },
       type: {
         type: Sequelize.STRING,
-        allowNull: true,
       },
       created_date: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      inactive_date: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      classification: {
         type: Sequelize.STRING,
-        allowNull: true,
       },
       certificate_no: {
         type: Sequelize.STRING,
-        allowNull: true,
       },
       certificate_agency: {
         type: Sequelize.STRING,
-        allowNull: true,
       },
       certificate_expiration_date: {
-        type: Sequelize.DATE,
-        allowNull: true,
+        type: Sequelize.STRING,
       },
       certificate_registration_date: {
-        type: Sequelize.DATE,
-        allowNull: true,
-      },
-      status: {
         type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: "Pending",
       },
       vendor_email: {
         type: Sequelize.STRING,
-        allowNull: true,
-        validate: {
-          isEmail: true,
-        },
+        // validate: {
+        //   isEmail: true,
+        // },
+      },
+      remarks: {
+        type: Sequelize.STRING,
+      },
+      status: {
+        type: Sequelize.STRING,
+        defaultValue: false,
       },
       delete_flag: {
-        type: Sequelize.BOOLEAN,
+        type: Sequelize.STRING,
         defaultValue: false
       }
       ,
       isMSME_flag: {
-        type: Sequelize.BOOLEAN,
+        type: Sequelize.STRING,
         defaultValue: true
       },
       remarks: {
         type: Sequelize.STRING,
-
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.STRING,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.STRING,
       },
     });
   },

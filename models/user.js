@@ -18,7 +18,6 @@ module.exports = (sequelize, DataTypes) => {
     {
       email: {
         type: DataTypes.STRING,
-        allowNull: false,
         unique: true,
         validate: {
           isEmail: true,
@@ -26,17 +25,14 @@ module.exports = (sequelize, DataTypes) => {
       },
       username: {
         type: DataTypes.STRING,
-        allowNull: false,
         unique: true,
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: false,
 
       },
       verify_password: {
         type: DataTypes.STRING,
-        allowNull: false,
         validate: {
           checkPassword() {
             if (this.password !== this.verify_password) {
@@ -53,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
       otp: {
         type: DataTypes.STRING,
       },
+      plant: {
+        type: DataTypes.STRING
+      }
     },
     {
       sequelize,

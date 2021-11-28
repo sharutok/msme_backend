@@ -11,30 +11,27 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         unique: true,
-        allowNull: false,
       },
       username: {
-        allowNull: false,
         unique: true,
         type: Sequelize.STRING,
       },
       password: {
-        allowNull: false,
         type: Sequelize.STRING,
       },
       verify_password: {
-        allowNull: false,
         type: Sequelize.STRING,
       },
       otp: {
         type: Sequelize.STRING,
       },
+      plant: {
+        type: Sequelize.STRING
+      },
       createdAt: {
-        allowNull: false,
         type: Sequelize.DATE,
       },
       updatedAt: {
-        allowNull: false,
         type: Sequelize.DATE,
       },
     });
