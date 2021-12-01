@@ -1,9 +1,31 @@
-const { vendor_master, vendor_master2 } = require("../models");
-
+const { vendor_master } = require("../models");
 const sequelize = require("sequelize");
 const Op = sequelize.Op;
 const sendEmail = require("../email");
 
+
+ function op_plant(plant) {
+    if (plant === "CHD") {
+      return a = ["CJ (CHD PROJ)", "CE (CHD EQPT)", "CC(CHN CONS)", "CG (CHD PWRG)", "PE (PMP EQPT)", "CW (CHD WAPS)", "CD (CHD DEALERS)", "CH (CHD CONS)", "PE (PMP EQPT)"]
+    }
+    else if (plant === "CHN") {
+      return b = ["CC(CHN CONS)"]
+    }
+    else if (plant === "HO") {
+      return c = ["HO (HEAD OFFICE)"]
+    }
+    else if (plant === "RPR") {
+      return d = ["RC (RPR CONS)"]
+    }
+    else if (plant === "SIL") {
+      return e = ["SC (SIL CONS)"]
+    }
+    else if (plant === "ALL") {
+      return d = ["HO (HEAD OFFICE)", "RC (RPR CONS)", "SC (SIL CONS)", "CC(CHN CONS)", "CJ (CHD PROJ)", "CE (CHD EQPT)", "CC(CHN CONS)", "CG (CHD PWRG)", "PE (PMP EQPT)", "CW (CHD WAPS)", "CD (CHD DEALERS)", "CH (CHD CONS)", "PE (PMP EQPT)"]
+    }
+  }
+
+let plantValueFromCookie;
 //POST DATA 
 exports.sendData = async (req, res) => {
   let data = {
@@ -111,25 +133,21 @@ exports.seeData = async (req, res) => {
 
 //GET ALL VENDERS
 exports.allVendor = async (req, res) => {
-
-  let allVendor = await vendor_master.findAll(
-    {
-      where: {
-        delete_flag: false,
-        // plant: {
-        //   [Op.like]: `%${plant}%`,
-        // }
-      }
+  const { plant } = req.params
+  // console.log(plant);
+  let result = op_plant(plant)
+ plantValueFromCookie=result
+  let allVendor = await vendor_master.findAll({
+    where: {
+      organization: result, delete_flag: false
     }
-  );
-  res.status(201).json({
-    length: allVendor.length,
-    allVendor,
   })
+  res.json({
+    result_length: allVendor.length,
+    allVendor
 
-
-
-};
+  })
+}
 
 //UPDATE VENDOR USING
 exports.updateData = async (req, res) => {
@@ -202,9 +220,14 @@ exports.deleteData = async (req, res) => {
 
 //GET STATUS ACCEPTED OR PENDING
 exports.vendorStatus = async (req, res) => {
+console.log(plantValueFromCookie)
   const status = req.params.status;
   try {
-    const isStatus = await vendor_master.findAll({ where: { status, delete_flag: false } });
+    const isStatus = await vendor_master.findAll(
+      { where:
+       { status, 
+       delete_flag: false,
+       organization:plantValueFromCookie } });
     res.status(200).json({
       result_for: status,
       result: isStatus.length,

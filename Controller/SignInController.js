@@ -11,29 +11,49 @@ function createToken(id) {
   return token;
 }
 
-//POST- SIGNIN USERS
+//POST- CREATE USERS
 exports.CreateNewUser = async (req, res) => {
-  const { email, username, password, verify_password } = req.body;
-  const data = { email, username, password, verify_password };
-  try {
-    const createUser = await User.create(data);
-    token = createToken(createUser.id);
-    res.status(201).json({
-      message: "created successfully",
-      token,
-      createUser,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(404).json({
-      error,
-      message: "not created ",
-    });
+  const { email, username, password, verify_password, plant,  role } = req.body;
+  const data = { email, username, password, verify_password, plant,  role };
+console.log(data);
+try {
+  const isUser=await User.findOne({
+    where:{
+      username
+    }
+  })
+  if(isUser){
+    res.status(400).json({
+      mess:`username ${username} already exist!!!`
+    })
   }
+  else{
+    try {
+      const createUser = await User.create(data);
+      token = createToken(createUser.id);
+         res.status(200).json({
+           message: "created successfully",
+           token,
+           createUser,
+         });
+      
+    } catch (error) {
+       res.status(400).json({
+     mess: `user ${username} aready exist`
+     })
+    }
+  }
+} catch (error) {
+   res.status(400).json({
+       mess: `user ${username} aready exist`
+  })
+}
 };
 
 //POST- LOGIN USERS
 exports.loginIn = async (req, res, next) => {
+//  res.cookie('cookiename', 'cookievalue', { maxAge: 900000, httpOnly: true });
+
   const { username, password } = req.body;
   if (!username && !password) {
     return res.status(400).json({
@@ -45,8 +65,14 @@ exports.loginIn = async (req, res, next) => {
       where: { username },
     });
     token = createToken(isUser.id);
-    // console.log(await brypt.compare(password, isUser.password));
+    // console.log(log);
+    res.cookie("jwt", "token", {
+      httpOnly: true
+    })
     if (isUser && (await brypt.compare(password, isUser.password))) {
+
+      res.cookie("users", "asz")
+      res.cookie("plants", "scadszvxc")
       return res.status(200).json({
         message: "found",
         isUser,
@@ -137,35 +163,65 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+
 //GET USER BY EMAIL
 exports.getUserByEmail = async (req, res) => {
   const { email } = req.params
   const user = await User.findOne({ where: { email } })
   if (user) {
-    return res.status(302).json({
-      user
+    res.status(401).json({
+      message: ` email ${email} already exist`
+    })
+  }
+  else {
+    return res.status(200).json({
+      result: [{
+        emp_id: user.id,
+        email: user.email,
+        username: user.username,
+        plant: user.plant,
+      }]
     })
   }
   res.status(401).json({
-    message: `there is no user of ${email}`
+    message: `there is no user email of ${email}`
   })
 
 }
-//GET USER BY USERNAME
-exports.getUserByUsername = async (req, res) => {
-  const { username } = req.params
-  const user = await User.findOne({ where: { username } })
+
+//UPDATE USER PERMISSION
+exports.userPermission = async (req, res) => {
+  const { email } = req.params
+  const { username, plant, } = req.body
+  const data = {
+    email,
+    username,
+    plant,
+  }
+  const user = await User.findOne({ where: { email } })
   if (user) {
-    return res.status(201).json({
-      user
+    const updatedUser = await User.update(data, { where: { email } })
+    return res.status(200).json({
+      message: "updated"
     })
   }
   res.status(401).json({
-    message: `there is no user of ${username}`
+    message: `there is no useremail of ${email}`
   })
-
 }
 
+//DELETE USER 
+exports.deleteUser = async (req, res) => {
+  const { email } = req.params
+  console.log(email);
+  const user = await User.findOne({ where: { email } })
+  if (user) {
+    await user.destroy({ where: { email } })
+  }
+  res.status(401).json({
+    message: `there is no useremail of ${email}`
+  })
+}
 
 
 //PROTECT MIDDELEWARE
@@ -199,3 +255,15 @@ exports.protect = async (req, res, next) => {
     });
   }
 };
+exports.getAllUsers = async (req, res) => {
+  const result = await User.findAll({
+    attributes: {
+      exclude: ['password', 'verify_password', 'otp', 'updatedAt', 'createdAt']
+    }
+  })
+
+  res.json({
+    length: result.length,
+    result
+  })
+}

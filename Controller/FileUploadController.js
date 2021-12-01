@@ -69,8 +69,6 @@ exports.deleteImg = async (req, res) => {
 
 }
 
-
-
 //GET
 exports.uploadFileImgGet = async (req, res) => {
   try {

@@ -51,6 +51,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       plant: {
         type: DataTypes.STRING
+      },
+      active: {
+        type: DataTypes.STRING,
+        defaultValue: true
+      },
+      role: {
+        type: DataTypes.STRING
       }
     },
     {
