@@ -6,10 +6,10 @@ const sendEmail = require("../email");
 
  function op_plant(plant) {
     if (plant === "CHD") {
-      return a = ["CJ (CHD PROJ)", "CE (CHD EQPT)", "CC(CHN CONS)", "CG (CHD PWRG)", "PE (PMP EQPT)", "CW (CHD WAPS)", "CD (CHD DEALERS)", "CH (CHD CONS)", "PE (PMP EQPT)"]
+      return a = ["CD (CHD DEALERS)","CE (CHD EQPT)","CG (CHD PWRG)","CJ (CHD PROJ)","CW (CHD WAPS)","PE (PMP EQPT)"]
     }
     else if (plant === "CHN") {
-      return b = ["CC(CHN CONS)"]
+      return b = ["CC (CHN CONS)"]
     }
     else if (plant === "HO") {
       return c = ["HO (HEAD OFFICE)"]
@@ -77,9 +77,10 @@ exports.sendData = async (req, res) => {
 // SEE DATA FOR GIVEN VENDOR NO
 exports.seeData = async (req, res) => {
   const id = req.params.id;
+  const org=req.params.org 
   try {
     const data = await vendor_master.findOne({
-      where: { supplier_number: id },
+      where: { supplier_number: id ,organization:org},
     });
 
     if (data === null) {
@@ -134,13 +135,13 @@ exports.seeData = async (req, res) => {
 //GET ALL VENDERS
 exports.allVendor = async (req, res) => {
   const { plant } = req.params
-  // console.log(plant);
+   console.log(plant);
   let result = op_plant(plant)
  plantValueFromCookie=result
   let allVendor = await vendor_master.findAll({
     where: {
       organization: result, delete_flag: false
-    }
+    },
   })
   res.json({
     result_length: allVendor.length,
@@ -153,9 +154,9 @@ exports.allVendor = async (req, res) => {
 exports.updateData = async (req, res) => {
   const id = req.params.id;
   const {
-    supplier_number,
-    supplier_name,
-    organization,
+    // supplier_number,
+    // supplier_name,
+    // organization,
     type,
     certificate_no,
     created_date,
@@ -166,9 +167,9 @@ exports.updateData = async (req, res) => {
     remarks, status, delete_flag, isMSME_flag
   } = req.body
   const data = {
-    supplier_number,
-    supplier_name,
-    organization,
+    // supplier_number,
+    // supplier_name,
+    // organization,
     type,
     certificate_no,
     created_date,
@@ -176,7 +177,11 @@ exports.updateData = async (req, res) => {
     certificate_expiration_date,
     certificate_registration_date,
     vendor_email,
-    remarks, status, delete_flag, isMSME_flag
+    remarks, 
+    status,
+     delete_flag,
+      isMSME_flag
+
   };
 
   const isSupplier_id = await vendor_master.findOne({
@@ -227,7 +232,7 @@ console.log(plantValueFromCookie)
       { where:
        { status, 
        delete_flag: false,
-       organization:plantValueFromCookie } });
+       organization:plantValueFromCookie } });  
     res.status(200).json({
       result_for: status,
       result: isStatus.length,
@@ -347,3 +352,59 @@ exports.dataForToday = async (req, res) => {
 
 }
 
+//DATA FOR GRAPH
+exports.dataSetForGraph=async(req,res)=>{
+const status_=[1,0]//[Approved,Pending]
+const plant_=["CHD","CHN","RPR","HO","SIL"]
+const ay=[]
+const bz=[]
+let ab=[...status_]  
+let bc=[...plant_]  
+try{
+for(let i=0;i<=ab.length-1;i++){
+  for(let j=0;j<=bc.length-1;j++){
+    // console.log(ab[i],bc[j]);
+    let foo=await vendor_master.findAndCountAll({
+      where:{organization:op_plant(bc[j]),status:ab[i]}
+    })
+    ay.push({_plant_:bc[j],_status_:ab[i],count:foo.count});
+    
+  }
+}
+bc=[...plant_] 
+for(let i=0;i<=plant_.length-1;i++){
+  let poo=await vendor_master.findAndCountAll({
+    where:{organization:op_plant(plant_[i])}
+  })
+  bz.push({_plant_:plant_[i],count:poo.count})
+}
+
+res.json({
+  //no vendors in each plant
+  VendorsInEachPlant: bz,
+  //no of vendors whose status is true or false in each plant
+  vendorStatus:ay
+})
+}
+catch{
+  res.json({
+     mess:"yikessss in dataSetForGraph "
+  })
+}
+}
+
+exports.showDataOfMSME=async(req,res)=>{
+  const msme_vendors=await vendor_master.findAll({
+    where:{
+      certificate_no :{
+        [Op.ne]:""
+      },
+    },
+  })  
+  // console.log(msme_vendors);
+res.json({
+length:msme_vendors.length,
+msme_vendors,
+
+})  
+}

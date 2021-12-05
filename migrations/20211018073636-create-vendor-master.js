@@ -55,7 +55,8 @@ module.exports = {
       ,
       isMSME_flag: {
         type: Sequelize.STRING,
-        defaultValue: true
+        
+        
       },
       remarks: {
         type: Sequelize.STRING,

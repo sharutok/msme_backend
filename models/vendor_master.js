@@ -59,9 +59,9 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: false
       }
       ,
-      isMSME_flag: {
+      isMSME_flag: {  
         type: DataTypes.STRING,
-        defaultValue: true
+
       },
       remarks: {
         type: DataTypes.STRING,
