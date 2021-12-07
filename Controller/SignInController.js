@@ -52,8 +52,6 @@ try {
 
 //POST- LOGIN USERS
 exports.loginIn = async (req, res, next) => {
-//  res.cookie('cookiename', 'cookievalue', { maxAge: 900000, httpOnly: true });
-
   const { username, password } = req.body;
   if (!username && !password) {
     return res.status(400).json({
@@ -65,7 +63,6 @@ exports.loginIn = async (req, res, next) => {
       where: { username },
     });
     token = createToken(isUser.id);
-    // console.log(log);
     res.cookie("jwt", "token", {
       httpOnly: true
     })

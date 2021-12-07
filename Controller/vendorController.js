@@ -2,7 +2,8 @@ const { vendor_master } = require("../models");
 const sequelize = require("sequelize");
 const Op = sequelize.Op;
 const sendEmail = require("../email");
-
+var LocalStorage = require('node-localstorage').LocalStorage
+localStorage = new LocalStorage('./scratch');
 
  function op_plant(plant) {
     if (plant === "CHD") {
@@ -21,11 +22,27 @@ const sendEmail = require("../email");
       return e = ["SC (SIL CONS)"]
     }
     else if (plant === "ALL") {
-      return d = ["HO (HEAD OFFICE)", "RC (RPR CONS)", "SC (SIL CONS)", "CC(CHN CONS)", "CJ (CHD PROJ)", "CE (CHD EQPT)", "CC(CHN CONS)", "CG (CHD PWRG)", "PE (PMP EQPT)", "CW (CHD WAPS)", "CD (CHD DEALERS)", "CH (CHD CONS)", "PE (PMP EQPT)"]
+      return d = ["HO (HEAD OFFICE)", "RC (RPR CONS)", "SC (SIL CONS)", "CC (CHN CONS)", "CJ (CHD PROJ)", "CE (CHD EQPT)",  "CG (CHD PWRG)", "PE (PMP EQPT)", "CW (CHD WAPS)", "CD (CHD DEALERS)", "CH (CHD CONS)", "PE (PMP EQPT)"]
     }
   }
 
 let plantValueFromCookie;
+//GET ALL VENDERS
+exports.allVendor = async (req, res) => {
+   const { plant } = req.params
+  let result = op_plant(plant)
+  localStorage.setItem('plant', plant);
+  let allVendor = await vendor_master.findAll({
+    where: {
+      organization: result, delete_flag: false
+    },
+  })
+  res.json({
+    result_length: allVendor.length,
+    allVendor
+
+  })
+}
 //POST DATA 
 exports.sendData = async (req, res) => {
   let data = {
@@ -44,7 +61,6 @@ exports.sendData = async (req, res) => {
     status: req.body.status,
     remarks: req.body.remarks
   };
-
   const id = req.params.id;
   try {
     const findData = await vendor_master.findOne({
@@ -80,7 +96,7 @@ exports.seeData = async (req, res) => {
   const org=req.params.org 
   try {
     const data = await vendor_master.findOne({
-      where: { supplier_number: id ,organization:org},
+      where: { supplier_number: id ,organization:org, delete_flag: false},
     });
 
     if (data === null) {
@@ -132,23 +148,7 @@ exports.seeData = async (req, res) => {
   }
 };
 
-//GET ALL VENDERS
-exports.allVendor = async (req, res) => {
-  const { plant } = req.params
-   console.log(plant);
-  let result = op_plant(plant)
- plantValueFromCookie=result
-  let allVendor = await vendor_master.findAll({
-    where: {
-      organization: result, delete_flag: false
-    },
-  })
-  res.json({
-    result_length: allVendor.length,
-    allVendor
 
-  })
-}
 
 //UPDATE VENDOR USING
 exports.updateData = async (req, res) => {
@@ -225,14 +225,16 @@ exports.deleteData = async (req, res) => {
 
 //GET STATUS ACCEPTED OR PENDING
 exports.vendorStatus = async (req, res) => {
-console.log(plantValueFromCookie)
+console.log("GET STATUS ACCEPTED OR PENDING");
+let cookies =(localStorage.getItem('plant'));
   const status = req.params.status;
   try {
     const isStatus = await vendor_master.findAll(
       { where:
        { status, 
        delete_flag: false,
-       organization:plantValueFromCookie } });  
+        organization:op_plant(cookies)
+        } });  
     res.status(200).json({
       result_for: status,
       result: isStatus.length,
@@ -252,7 +254,7 @@ exports.smartSearch = async (req, res) => {
   console.log(searchVariable);
   try {
     const searchResult = await vendor_master.findAll({
-      where: {
+      where: {delete_flag: false,
         [Op.or]: [
           {
             supplier_number: {
@@ -275,22 +277,19 @@ exports.smartSearch = async (req, res) => {
               [Op.like]: `%${searchVariable}%`,
             },
           },
-          // {
-          //   status: {
-          //     [Op.like]: `%${searchVariable}%`,
-          //   },
-          // },
+          
         ],
+        // delete_flag: false,
       },
     });
     res.status(200).json({
       length: searchResult.length,
       result: searchResult,
     });
-    console.log(searchResult);
+    // console.log(searchResult);
   } catch (error) {
     res.status(400).json({
-      message: "something went wromg......",
+      message: "something went wrong......",
     });
   }
 };
@@ -301,7 +300,7 @@ exports.sendEmail = async (req, res) => {
   const supplier_number = req.body.supplier_number;
   const portalLink = req.body.portal_link;
 
-  console.log(vendor_email, supplier_number, portalLink);
+  
   try {
     await sendEmail({
       email: vendor_email,
@@ -363,9 +362,9 @@ let bc=[...plant_]
 try{
 for(let i=0;i<=ab.length-1;i++){
   for(let j=0;j<=bc.length-1;j++){
-    // console.log(ab[i],bc[j]);
+   
     let foo=await vendor_master.findAndCountAll({
-      where:{organization:op_plant(bc[j]),status:ab[i]}
+      where:{organization:op_plant(bc[j]),status:ab[i], delete_flag: false}
     })
     ay.push({_plant_:bc[j],_status_:ab[i],count:foo.count});
     
@@ -374,15 +373,15 @@ for(let i=0;i<=ab.length-1;i++){
 bc=[...plant_] 
 for(let i=0;i<=plant_.length-1;i++){
   let poo=await vendor_master.findAndCountAll({
-    where:{organization:op_plant(plant_[i])}
+    where:{organization:op_plant(plant_[i]),delete_flag: false}
   })
   bz.push({_plant_:plant_[i],count:poo.count})
 }
 
-res.json({
   //no vendors in each plant
-  VendorsInEachPlant: bz,
   //no of vendors whose status is true or false in each plant
+res.json({
+  VendorsInEachPlant: bz,
   vendorStatus:ay
 })
 }
@@ -392,16 +391,21 @@ catch{
   })
 }
 }
-
+// MSME VENDORS ONLY
 exports.showDataOfMSME=async(req,res)=>{
+   let org=op_plant(plantValueFromCookie) 
+    // console.log("MSME VENDORS ONLY");
+let cookies =(localStorage.getItem('plant'));
+// console.log(cookies);
   const msme_vendors=await vendor_master.findAll({
     where:{
       certificate_no :{
         [Op.ne]:""
       },
+      organization:op_plant(cookies), delete_flag: false
     },
   })  
-  // console.log(msme_vendors);
+ 
 res.json({
 length:msme_vendors.length,
 msme_vendors,

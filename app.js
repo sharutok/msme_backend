@@ -7,8 +7,6 @@ const SignInRouter = require("./Router/SignInRouter");
 const fileUpload = require("express-fileupload");
 const cors = require("cors");
 
-
-
 app.use(function (req, res, next) {
     res.set("Access-Control-Allow-Origin", "http://localhost:8080");
     res.set("Access-Control-Allow-Creadentials", "true")
@@ -17,12 +15,13 @@ app.use(function (req, res, next) {
     next();
 });
 
-
-
 app.use(cors());
 app.use(fileUpload());
 app.use(express.json());
 app.use(cookieParser())
+// app.get('/', function(req, res){
+//    res.cookie('test', "username", {maxAge: 10800}).send('cookie set');
+// });
 app.use("/login", SignInRouter);
 app.use("/", vendor);
 app.use("/file-upload", fileUploadRoute);

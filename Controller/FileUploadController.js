@@ -74,6 +74,7 @@ exports.uploadFileImgGet = async (req, res) => {
   try {
     const result = await image_uploader.findOne({
       where: { supplier_number: req.params.id },
+      
     });
     res.json({
       supplier_number: result.supplier_number,
