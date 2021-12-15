@@ -16,7 +16,10 @@ const sendEmail = async (option) => {
     from: "Sharan Kudtarkar <itpune@adorians.com>",
     to: option.email,
     subject: option.subject,
-    text: option.message,
+    text: option.text,
+    html: option.html,
+    // text: 'For clients with plaintext support only',
+    html: option.html,
   };
   // console.log(mailOption);
   await transporter.sendMail(mailOption);

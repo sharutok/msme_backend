@@ -15,7 +15,7 @@ function createToken(id) {
 exports.CreateNewUser = async (req, res) => {
   const { email, username, password, verify_password, plant,  role } = req.body;
   const data = { email, username, password, verify_password, plant,  role };
-console.log(data);
+
 try {
   const isUser=await User.findOne({
     where:{
@@ -100,7 +100,7 @@ exports.resetPasswordSendOtp = async (req, res) => {
 
   if (isEmailThere) {
     const otp = isEmailThere.passwordResetOTP();
-    console.log({ otp });
+    // console.log({ otp });
     await isEmailThere.save();
     try {
 
@@ -109,11 +109,16 @@ exports.resetPasswordSendOtp = async (req, res) => {
         subject: "Password Reset",
         message: `Dear User, your one time password is ${otp}`
       });
+      res.status(200).json({
+        mess:"otp sent"
+      })
 
     } catch (error) {
-      res.status(404).json({ error })
+      res.status(404).json({
+        mess:"somrthing wrong happend in sending otp..."
+      })
     }
-    res.end();
+
   }
   else if (isEmailThere === null) {
     res.json({
@@ -131,12 +136,12 @@ exports.resetPassword = async (req, res) => {
         otp,
       },
     });
-    console.log(isOtp);
+    // console.log(isOtp);
 
     if (isOtp) {
       try {
-        await User.update({ password, verify_password, otp: "" }, { where: { otp } })
-        console.log("updated");
+        await User.update({ password, verify_password, otp: null }, { where: { otp } })
+        // console.log("updated");
         return res.status(201).json({
           message: "password updated",
         })
@@ -165,24 +170,25 @@ exports.resetPassword = async (req, res) => {
 exports.getUserByEmail = async (req, res) => {
   const { email } = req.params
   const user = await User.findOne({ where: { email } })
-  if (user) {
-    res.status(401).json({
-      message: ` email ${email} already exist`
-    })
-  }
-  else {
-    return res.status(200).json({
-      result: [{
+
+try {
+    return res.status(200).json(
+    {  
         emp_id: user.id,
         email: user.email,
         username: user.username,
         plant: user.plant,
-      }]
-    })
-  }
+        otp:user.otp
+    }
+    )
+  
+} catch (error) {
   res.status(401).json({
     message: `there is no user email of ${email}`
   })
+  
+}
+
 
 }
 

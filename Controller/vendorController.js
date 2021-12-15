@@ -4,32 +4,32 @@ const Op = sequelize.Op;
 const sendEmail = require("../email");
 var LocalStorage = require('node-localstorage').LocalStorage
 localStorage = new LocalStorage('./scratch');
-
- function op_plant(plant) {
-    if (plant === "CHD") {
-      return a = ["CD (CHD DEALERS)","CE (CHD EQPT)","CG (CHD PWRG)","CJ (CHD PROJ)","CW (CHD WAPS)","PE (PMP EQPT)"]
-    }
-    else if (plant === "CHN") {
-      return b = ["CC (CHN CONS)"]
-    }
-    else if (plant === "HO") {
-      return c = ["HO (HEAD OFFICE)"]
-    }
-    else if (plant === "RPR") {
-      return d = ["RC (RPR CONS)"]
-    }
-    else if (plant === "SIL") {
-      return e = ["SC (SIL CONS)"]
-    }
-    else if (plant === "ALL") {
-      return d = ["HO (HEAD OFFICE)", "RC (RPR CONS)", "SC (SIL CONS)", "CC (CHN CONS)", "CJ (CHD PROJ)", "CE (CHD EQPT)",  "CG (CHD PWRG)", "PE (PMP EQPT)", "CW (CHD WAPS)", "CD (CHD DEALERS)", "CH (CHD CONS)", "PE (PMP EQPT)"]
-    }
+const moment = require('moment')
+function op_plant(plant) {
+  if (plant === "CHD") {
+    return a = ["CD (CHD DEALERS)", "CE (CHD EQPT)", "CG (CHD PWRG)", "CJ (CHD PROJ)", "CW (CHD WAPS)", "PE (PMP EQPT)"]
   }
+  else if (plant === "CHN") {
+    return b = ["CC (CHN CONS)"]
+  }
+  else if (plant === "HO") {
+    return c = ["HO (HEAD OFFICE)"]
+  }
+  else if (plant === "RPR") {
+    return d = ["RC (RPR CONS)"]
+  }
+  else if (plant === "SIL") {
+    return e = ["SC (SIL CONS)"]
+  }
+  else if (plant === "ALL") {
+    return d = ["HO (HEAD OFFICE)", "RC (RPR CONS)", "SC (SIL CONS)", "CC (CHN CONS)", "CJ (CHD PROJ)", "CE (CHD EQPT)", "CG (CHD PWRG)", "PE (PMP EQPT)", "CW (CHD WAPS)", "CD (CHD DEALERS)", "CH (CHD CONS)", "PE (PMP EQPT)"]
+  }
+}
 
 let plantValueFromCookie;
 //GET ALL VENDERS
 exports.allVendor = async (req, res) => {
-   const { plant } = req.params
+  const { plant } = req.params
   let result = op_plant(plant)
   localStorage.setItem('plant', plant);
   let allVendor = await vendor_master.findAll({
@@ -93,10 +93,10 @@ exports.sendData = async (req, res) => {
 // SEE DATA FOR GIVEN VENDOR NO
 exports.seeData = async (req, res) => {
   const id = req.params.id;
-  const org=req.params.org 
+  const org = req.params.org
   try {
     const data = await vendor_master.findOne({
-      where: { supplier_number: id ,organization:org, delete_flag: false},
+      where: { supplier_number: id, organization: org, delete_flag: false },
     });
 
     if (data === null) {
@@ -177,10 +177,10 @@ exports.updateData = async (req, res) => {
     certificate_expiration_date,
     certificate_registration_date,
     vendor_email,
-    remarks, 
+    remarks,
     status,
-     delete_flag,
-      isMSME_flag
+    delete_flag,
+    isMSME_flag
 
   };
 
@@ -225,16 +225,19 @@ exports.deleteData = async (req, res) => {
 
 //GET STATUS ACCEPTED OR PENDING
 exports.vendorStatus = async (req, res) => {
-console.log("GET STATUS ACCEPTED OR PENDING");
-let cookies =(localStorage.getItem('plant'));
+  // console.log("GET STATUS ACCEPTED OR PENDING");
+  let cookies = (localStorage.getItem('plant'));
   const status = req.params.status;
   try {
     const isStatus = await vendor_master.findAll(
-      { where:
-       { status, 
-       delete_flag: false,
-        organization:op_plant(cookies)
-        } });  
+      {
+        where:
+        {
+          status,
+          delete_flag: false,
+          organization: op_plant(cookies)
+        }
+      });
     res.status(200).json({
       result_for: status,
       result: isStatus.length,
@@ -254,7 +257,8 @@ exports.smartSearch = async (req, res) => {
   console.log(searchVariable);
   try {
     const searchResult = await vendor_master.findAll({
-      where: {delete_flag: false,
+      where: {
+        delete_flag: false,
         [Op.or]: [
           {
             supplier_number: {
@@ -277,7 +281,7 @@ exports.smartSearch = async (req, res) => {
               [Op.like]: `%${searchVariable}%`,
             },
           },
-          
+
         ],
         // delete_flag: false,
       },
@@ -299,17 +303,29 @@ exports.sendEmail = async (req, res) => {
   const vendor_email = req.body.vendor_email;
   const supplier_number = req.body.supplier_number;
   const portalLink = req.body.portal_link;
+  const vendor = await vendor_master.findOne({
+    where: {
+      delete_flag: false, supplier_number
+    }
+  })
+  console.log(vendor.remarks, vendor.status);
 
-  
   try {
     await sendEmail({
       email: vendor_email,
-      subject: "Test Subject",
-      message: `Dear Vendor,
-      Please Click ${portalLink} and fill in the required details along with uploading of certificate.
-      Your Vendor Number is : ${supplier_number}
-      
-      `,
+      subject: "MSME Vendor Form",
+      html: '<!DOCTYPE html>' +
+        '<html><head><title>Appointment</title>' +
+        '</head><body><div>' +
+        '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
+        '<p>Dear Vendor.</p>' +
+        `MSME Vendor portal: <a href="${portalLink}">Click Here!!!!</a>` +
+        `<p>Your Vendor Number: ${supplier_number}</p>` +
+        `<p>Status: <b>${vendor.status === "0" ? "Pending" : "Approved"}</b></p>` +
+        `REMARKS: ${vendor.remarks ? vendor.remarks : "none"}` +
+        `<p>Date:${moment().format('L')}</p>` +
+        `<p>${moment().format('LT')} </p>` +
+        '</div></body></html>',
     });
     res.json({
       message: `send to email ${vendor_email}`,
@@ -352,63 +368,62 @@ exports.dataForToday = async (req, res) => {
 }
 
 //DATA FOR GRAPH
-exports.dataSetForGraph=async(req,res)=>{
-const status_=[1,0]//[Approved,Pending]
-const plant_=["CHD","CHN","RPR","HO","SIL"]
-const ay=[]
-const bz=[]
-let ab=[...status_]  
-let bc=[...plant_]  
-try{
-for(let i=0;i<=ab.length-1;i++){
-  for(let j=0;j<=bc.length-1;j++){
-   
-    let foo=await vendor_master.findAndCountAll({
-      where:{organization:op_plant(bc[j]),status:ab[i], delete_flag: false}
+exports.dataSetForGraph = async (req, res) => {
+  const status_ = [1, 0]//[Approved,Pending]
+  const plant_ = ["CHD", "CHN", "RPR", "HO", "SIL"]
+  const ay = []
+  const bz = []
+  let ab = [...status_]
+  let bc = [...plant_]
+  try {
+    for (let i = 0; i <= ab.length - 1; i++) {
+      for (let j = 0; j <= bc.length - 1; j++) {
+
+        let foo = await vendor_master.findAndCountAll({
+          where: { organization: op_plant(bc[j]), status: ab[i], delete_flag: false }
+        })
+        ay.push({ _plant_: bc[j], _status_: ab[i], count: foo.count });
+
+      }
+    }
+    bc = [...plant_]
+    for (let i = 0; i <= plant_.length - 1; i++) {
+      let poo = await vendor_master.findAndCountAll({
+        where: { organization: op_plant(plant_[i]), delete_flag: false }
+      })
+      bz.push({ _plant_: plant_[i], count: poo.count })
+    }
+
+    //no vendors in each plant
+    //no of vendors whose status is true or false in each plant
+    res.json({
+      VendorsInEachPlant: bz,
+      vendorStatus: ay
     })
-    ay.push({_plant_:bc[j],_status_:ab[i],count:foo.count});
-    
+  }
+  catch {
+    res.json({
+      mess: "yikessss in dataSetForGraph "
+    })
   }
 }
-bc=[...plant_] 
-for(let i=0;i<=plant_.length-1;i++){
-  let poo=await vendor_master.findAndCountAll({
-    where:{organization:op_plant(plant_[i]),delete_flag: false}
-  })
-  bz.push({_plant_:plant_[i],count:poo.count})
-}
-
-  //no vendors in each plant
-  //no of vendors whose status is true or false in each plant
-res.json({
-  VendorsInEachPlant: bz,
-  vendorStatus:ay
-})
-}
-catch{
-  res.json({
-     mess:"yikessss in dataSetForGraph "
-  })
-}
-}
 // MSME VENDORS ONLY
-exports.showDataOfMSME=async(req,res)=>{
-   let org=op_plant(plantValueFromCookie) 
-    // console.log("MSME VENDORS ONLY");
-let cookies =(localStorage.getItem('plant'));
-// console.log(cookies);
-  const msme_vendors=await vendor_master.findAll({
-    where:{
-      certificate_no :{
-        [Op.ne]:""
+exports.showDataOfMSME = async (req, res) => {
+  let org = op_plant(plantValueFromCookie)
+  let cookies = (localStorage.getItem('plant'));
+  // console.log(cookies);
+  const msme_vendors = await vendor_master.findAll({
+    where: {
+      certificate_no: {
+        [Op.ne]: ""
       },
-      organization:op_plant(cookies), delete_flag: false
+      organization: op_plant(cookies), delete_flag: false
     },
-  })  
- 
-res.json({
-length:msme_vendors.length,
-msme_vendors,
+  })
 
-})  
+  res.json({
+    length: msme_vendors.length,
+    msme_vendors,
+
+  })
 }
