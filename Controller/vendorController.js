@@ -315,7 +315,7 @@ exports.sendEmail = async (req, res) => {
       email: vendor_email,
       subject: "MSME Vendor Form",
       html: '<!DOCTYPE html>' +
-        '<html><head><title>Appointment</title>' +
+        '<html><head>' +
         '</head><body><div>' +
         '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
         '<p>Dear Vendor.</p>' +
