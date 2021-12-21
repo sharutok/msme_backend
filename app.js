@@ -15,7 +15,6 @@ app.use(cors());
 app.use(fileUpload());
 app.use(express.json());
 app.use(cookieParser())
-
 app.use("/login", SignInRouter);
 app.use("/", vendor);
 app.use("/file-upload", fileUploadRoute);
