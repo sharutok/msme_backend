@@ -13,41 +13,41 @@ function createToken(id) {
 
 //POST- CREATE USERS
 exports.CreateNewUser = async (req, res) => {
-  const { email, username, password, verify_password, plant,  role } = req.body;
-  const data = { email, username, password, verify_password, plant,  role };
+  const { email, username, password, verify_password, plant, role } = req.body;
+  const data = { email, username, password, verify_password, plant, role };
 
-try {
-  const isUser=await User.findOne({
-    where:{
-      username
+  try {
+    const isUser = await User.findOne({
+      where: {
+        username
+      }
+    })
+    if (isUser) {
+      res.status(400).json({
+        mess: `username ${username} already exist!!!`
+      })
     }
-  })
-  if(isUser){
+    else {
+      try {
+        const createUser = await User.create(data);
+        token = createToken(createUser.id);
+        res.status(200).json({
+          message: "created successfully",
+          token,
+          createUser,
+        });
+
+      } catch (error) {
+        res.status(400).json({
+          mess: `user ${username} aready exist`
+        })
+      }
+    }
+  } catch (error) {
     res.status(400).json({
-      mess:`username ${username} already exist!!!`
+      mess: `user ${username} aready exist`
     })
   }
-  else{
-    try {
-      const createUser = await User.create(data);
-      token = createToken(createUser.id);
-         res.status(200).json({
-           message: "created successfully",
-           token,
-           createUser,
-         });
-      
-    } catch (error) {
-       res.status(400).json({
-     mess: `user ${username} aready exist`
-     })
-    }
-  }
-} catch (error) {
-   res.status(400).json({
-       mess: `user ${username} aready exist`
-  })
-}
 };
 
 //POST- LOGIN USERS
@@ -110,12 +110,12 @@ exports.resetPasswordSendOtp = async (req, res) => {
         message: `Dear User, your one time password is ${otp}`
       });
       res.status(200).json({
-        mess:"otp sent"
+        mess: "otp sent"
       })
 
     } catch (error) {
       res.status(404).json({
-        mess:"somrthing wrong happend in sending otp..."
+        mess: "somrthing wrong happend in sending otp..."
       })
     }
 
@@ -171,23 +171,23 @@ exports.getUserByEmail = async (req, res) => {
   const { email } = req.params
   const user = await User.findOne({ where: { email } })
 
-try {
+  try {
     return res.status(200).json(
-    {  
+      {
         emp_id: user.id,
         email: user.email,
         username: user.username,
         plant: user.plant,
-        otp:user.otp
-    }
+        otp: user.otp
+      }
     )
-  
-} catch (error) {
-  res.status(401).json({
-    message: `there is no user email of ${email}`
-  })
-  
-}
+
+  } catch (error) {
+    res.status(401).json({
+      message: `there is no user email of ${email}`
+    })
+
+  }
 
 
 }

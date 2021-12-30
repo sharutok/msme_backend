@@ -5,6 +5,7 @@ const sendEmail = require("../email");
 var LocalStorage = require('node-localstorage').LocalStorage
 localStorage = new LocalStorage('./scratch');
 const moment = require('moment')
+
 function op_plant(plant) {
   if (plant === "CHD") {
     return a = ["CD (CHD DEALERS)", "CE (CHD EQPT)", "CG (CHD PWRG)", "CJ (CHD PROJ)", "CW (CHD WAPS)", "PE (PMP EQPT)"]
@@ -69,9 +70,7 @@ exports.sendData = async (req, res) => {
 
     if (findData === null) {
       try {
-
         await vendor_master.create(data)
-
       } catch (error) {
         res.status(404).json({
           message: error,
@@ -94,6 +93,7 @@ exports.sendData = async (req, res) => {
 exports.seeData = async (req, res) => {
   const id = req.params.id;
   const org = req.params.org
+  console.log(id, org);
   try {
     const data = await vendor_master.findOne({
       where: { supplier_number: id, organization: org, delete_flag: false },

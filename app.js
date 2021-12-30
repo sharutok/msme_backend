@@ -7,10 +7,13 @@ const SignInRouter = require("./Router/SignInRouter");
 const fileUpload = require("express-fileupload");
 const cors = require("cors");
 const morgan = require('morgan')
+require('dotenv').config({
+    path: './.env'
+})
 
+// console.log(process.env.HOSTNAME);
 
 app.use(morgan('tiny'))
-
 app.use(cors());
 app.use(fileUpload());
 app.use(express.json());
