@@ -1,4 +1,4 @@
-const { vendor_master } = require("../models");
+const { vendor_master, User } = require("../models");
 const sequelize = require("sequelize");
 const Op = sequelize.Op;
 const sendEmail = require("../email");
@@ -31,6 +31,7 @@ let plantValueFromCookie;
 //GET ALL VENDERS
 exports.allVendor = async (req, res) => {
   const { plant } = req.params
+  console.log(plant);
   let result = op_plant(plant)
   localStorage.setItem('plant', plant);
   let allVendor = await vendor_master.findAll({
@@ -167,9 +168,6 @@ exports.updateData = async (req, res) => {
     remarks, status, delete_flag, isMSME_flag
   } = req.body
   const data = {
-    // supplier_number,
-    // supplier_name,
-    // organization,
     type,
     certificate_no,
     created_date,
@@ -181,9 +179,7 @@ exports.updateData = async (req, res) => {
     status,
     delete_flag,
     isMSME_flag
-
   };
-
   const isSupplier_id = await vendor_master.findOne({
     where: { supplier_number: id },
   });
@@ -255,10 +251,12 @@ exports.vendorStatus = async (req, res) => {
 exports.smartSearch = async (req, res) => {
   const searchVariable = req.params.searchVariable;
   console.log(searchVariable);
+  let cookies = (localStorage.getItem('plant'));
   try {
     const searchResult = await vendor_master.findAll({
       where: {
         delete_flag: false,
+        organization: op_plant(cookies),
         [Op.or]: [
           {
             supplier_number: {
@@ -283,7 +281,7 @@ exports.smartSearch = async (req, res) => {
           },
 
         ],
-        // delete_flag: false,
+
       },
     });
     res.status(200).json({
@@ -345,6 +343,7 @@ exports.dataForToday = async (req, res) => {
   try {
     const dataToday = await vendor_master.findAll({
       where: {
+        delete_flag: false,
         createdAt: {
           [Op.gt]: TODAY_START,
           [Op.lt]: NOW
@@ -426,4 +425,57 @@ exports.showDataOfMSME = async (req, res) => {
     msme_vendors,
 
   })
+}
+
+function plant_op(op) {
+  if (op === "CD (CHD DEALERS)" || "CE (CHD EQPT)" || "CG (CHD PWRG)" || "CJ (CHD PROJ)" || "CW (CHD WAPS)" || "PE (PMP EQPT)") {
+    return a = "CHD"
+  }
+  else if (op === "CC (CHN CONS)") {
+    return b = "CHN"
+  }
+  else if (op === "HO (HEAD OFFICE)") {
+    return c = "HO"
+  }
+  else if (op === "RC (RPR CONS)") {
+    return d = "RPR"
+  }
+  else if (op === "SC (SIL CONS)") {
+    return e = "SIL"
+  }
+  else if (op === "ALL") {
+    return d = null
+  }
+}
+// mail confirmation
+exports.mailConfirmation = async (req, res) => {
+  const userPlant = req.body.p
+  const supplier_number = req.body.vInfo.supplier_number
+  const getEmail = await User.findOne({
+    where: { plant: plant_op(userPlant) }
+  })
+  console.log(getEmail);
+  if (getEmail) {
+    try {
+      await sendEmail({
+        email: getEmail.email,
+        subject: "MSME Vendor Form",
+        html: '<!DOCTYPE html>' +
+          '<html><head>' +
+          '</head><body><div>' +
+          '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
+          `<p>Dear ${getEmail.username}.</p>` +
+          `<p> Vendor Number:<b>${supplier_number}</b>  has submitted form.Please check and review</p>` +
+          `<p>Date:${moment().format('L')}</p>` +
+          `<p>${moment().format('LT')} </p>` +
+          '</div></body></html>',
+      });
+    } catch (error) {
+      res.status(400).json({
+        mess: 'error in send mail confirmation'
+      })
+
+    }
+  }
+
 }

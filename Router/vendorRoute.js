@@ -10,11 +10,8 @@ const {
   sendEmail,
   dataForToday,
   dataSetForGraph,
-  showDataOfMSME
+  showDataOfMSME, mailConfirmation
 } = require("../Controller/vendorController");
-
-
-
 const vendor = express.Router();
 
 
@@ -27,4 +24,6 @@ vendor.route("/send_email/").post(sendEmail);
 vendor.route("/today_data").get(dataForToday)
 vendor.route("/graph/data/count").get(dataSetForGraph)
 vendor.route("/msms_vendor").get(showDataOfMSME)
+vendor.route("/mail/confirmation").post(mailConfirmation);
+
 module.exports = vendor;
