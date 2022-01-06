@@ -10,7 +10,10 @@ const {
   sendEmail,
   dataForToday,
   dataSetForGraph,
-  showDataOfMSME, mailConfirmation
+  showDataOfMSME,
+  postMailConfirmation,
+  preMailConfirmation,
+  vendor_masterToExcel
 } = require("../Controller/vendorController");
 const vendor = express.Router();
 
@@ -24,6 +27,8 @@ vendor.route("/send_email/").post(sendEmail);
 vendor.route("/today_data").get(dataForToday)
 vendor.route("/graph/data/count").get(dataSetForGraph)
 vendor.route("/msms_vendor").get(showDataOfMSME)
-vendor.route("/mail/confirmation").post(mailConfirmation);
+vendor.route("/mail/confirmation").post(postMailConfirmation);
+vendor.route("/pre/mail/confirmation").post(preMailConfirmation);
+vendor.route("/vendor_masterToExcel").get(vendor_masterToExcel)
 
 module.exports = vendor;

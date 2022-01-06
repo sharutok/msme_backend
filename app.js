@@ -7,6 +7,7 @@ const SignInRouter = require("./Router/SignInRouter");
 const fileUpload = require("express-fileupload");
 const cors = require("cors");
 const morgan = require('morgan')
+var json2xls = require('json2xls');
 require('dotenv').config({
     path: './.env'
 })
@@ -18,6 +19,8 @@ app.use(cors());
 app.use(fileUpload());
 app.use(express.json());
 app.use(cookieParser())
+app.use(json2xls.middleware);
+
 app.use("/login", SignInRouter);
 app.use("/", vendor);
 app.use("/file-upload", fileUploadRoute);

@@ -5,6 +5,10 @@ const sendEmail = require("../email");
 var LocalStorage = require('node-localstorage').LocalStorage
 localStorage = new LocalStorage('./scratch');
 const moment = require('moment')
+const mysqlConfig = require('../config/config.json')
+const mysql = require('mysql2')
+var json2xls = require('json2xls');
+const fs = require('fs')
 
 function op_plant(plant) {
   if (plant === "CHD") {
@@ -31,7 +35,7 @@ let plantValueFromCookie;
 //GET ALL VENDERS
 exports.allVendor = async (req, res) => {
   const { plant } = req.params
-  console.log(plant);
+  // console.log(plant);
   let result = op_plant(plant)
   localStorage.setItem('plant', plant);
   let allVendor = await vendor_master.findAll({
@@ -42,8 +46,8 @@ exports.allVendor = async (req, res) => {
   res.json({
     result_length: allVendor.length,
     allVendor
-
   })
+
 }
 //POST DATA 
 exports.sendData = async (req, res) => {
@@ -323,6 +327,7 @@ exports.sendEmail = async (req, res) => {
         `REMARKS: ${vendor.remarks ? vendor.remarks : "none"}` +
         `<p>Date:${moment().format('L')}</p>` +
         `<p>${moment().format('LT')} </p>` +
+        `<i>--- THIS IS AN AUTO GENERATED MAIL ---</i>` +
         '</div></body></html>',
     });
     res.json({
@@ -447,8 +452,8 @@ function plant_op(op) {
     return d = null
   }
 }
-// mail confirmation
-exports.mailConfirmation = async (req, res) => {
+// POST MAIL CONFIRMATION
+exports.postMailConfirmation = async (req, res) => {
   const userPlant = req.body.p
   const supplier_number = req.body.vInfo.supplier_number
   const getEmail = await User.findOne({
@@ -464,10 +469,11 @@ exports.mailConfirmation = async (req, res) => {
           '<html><head>' +
           '</head><body><div>' +
           '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
-          `<p>Dear ${getEmail.username}.</p>` +
-          `<p> Vendor Number:<b>${supplier_number}</b>  has submitted form.Please check and review</p>` +
+          `<p>Dear ${getEmail.username},</p>` +
+          `<p> Vendor Number:<b>${supplier_number}</b> has submitted the form. Please check and review</p>` +
           `<p>Date:${moment().format('L')}</p>` +
           `<p>${moment().format('LT')} </p>` +
+          `<i>--- THIS IS AN AUTO GENERATED MAIL ---</i>` +
           '</div></body></html>',
       });
     } catch (error) {
@@ -478,4 +484,58 @@ exports.mailConfirmation = async (req, res) => {
     }
   }
 
+}
+
+// PRE MAIL CONFIRMATION
+exports.preMailConfirmation = async (req, res) => {
+  const { vendorNo, plant, user } = req.body
+  // console.log({ vendorNo, plant, user });
+  const supplier_number = vendorNo
+  try {
+    const getEmail = await User.findOne({
+      where: { username: user }
+    })
+    try {
+      await sendEmail({
+        email: getEmail.email,
+        subject: "MSME Vendor Form",
+        html: '<!DOCTYPE html>' +
+          '<html><head>' +
+          '</head><body><div>' +
+          '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
+          `<p>Dear ${getEmail.username},</p>` +
+          `<p> Sent mail to Vendor Number: <b>${supplier_number}</b></p>` +
+          `<p>Date:${moment().format('L')}</p>` +
+          `<p>${moment().format('LT')} </p>` +
+          `<i>--- THIS IS AN AUTO GENERATED MAIL ---</i>` +
+          '</div></body></html>',
+      });
+    } catch (error) {
+      console.log(`error in send mail confirmation ${error}`)
+    }
+    res.json({
+      getEmail
+    })
+
+  } catch (error) {
+    console.log("error in preMailConfirmation getEmail ")
+  }
+}
+
+//CONVERT VENDOR MASTER TO EXCEL
+exports.vendor_masterToExcel = async (req, res) => {
+  const _plant = localStorage.getItem('plant')
+  let result = op_plant(_plant)
+  let allVendor = await vendor_master.findAll({
+    where: {
+      organization: result, delete_flag: false
+    },
+  })
+  const jsonVendors = JSON.parse(JSON.stringify(allVendor));
+  const xls = json2xls(jsonVendors);
+  fs.writeFileSync('data.xlsx', xls, 'binary');
+  // res.json({
+  //   res: allVendor.length
+  // })
+  // res.xls('data.xlsx', xls, 'binary')
 }
