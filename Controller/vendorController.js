@@ -42,6 +42,10 @@ exports.allVendor = async (req, res) => {
     where: {
       organization: result, delete_flag: false
     },
+    order: [
+      ['status', 'ASC']
+      , ['id', "ASC"]
+    ]
   })
   res.json({
     result_length: allVendor.length,
@@ -422,7 +426,10 @@ exports.showDataOfMSME = async (req, res) => {
         [Op.ne]: ""
       },
       organization: op_plant(cookies), delete_flag: false
-    },
+    }, order: [
+      ['status', 'ASC']
+      , ['id', "ASC"]
+    ]
   })
 
   res.json({
@@ -452,44 +459,11 @@ function plant_op(op) {
     return d = null
   }
 }
-// POST MAIL CONFIRMATION
-exports.postMailConfirmation = async (req, res) => {
-  const userPlant = req.body.p
-  const supplier_number = req.body.vInfo.supplier_number
-  const getEmail = await User.findOne({
-    where: { plant: plant_op(userPlant) }
-  })
-  console.log(getEmail);
-  if (getEmail) {
-    try {
-      await sendEmail({
-        email: getEmail.email,
-        subject: "MSME Vendor Form",
-        html: '<!DOCTYPE html>' +
-          '<html><head>' +
-          '</head><body><div>' +
-          '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
-          `<p>Dear ${getEmail.username},</p>` +
-          `<p> Vendor Number:<b>${supplier_number}</b> has submitted the form. Please check and review</p>` +
-          `<p>Date:${moment().format('L')}</p>` +
-          `<p>${moment().format('LT')} </p>` +
-          `<i>--- THIS IS AN AUTO GENERATED MAIL ---</i>` +
-          '</div></body></html>',
-      });
-    } catch (error) {
-      res.status(400).json({
-        mess: 'error in send mail confirmation'
-      })
-
-    }
-  }
-
-}
 
 // PRE MAIL CONFIRMATION
 exports.preMailConfirmation = async (req, res) => {
   const { vendorNo, plant, user } = req.body
-  // console.log({ vendorNo, plant, user });
+  console.log({ vendorNo, plant, user });
   const supplier_number = vendorNo
   try {
     const getEmail = await User.findOne({
@@ -514,7 +488,7 @@ exports.preMailConfirmation = async (req, res) => {
       console.log(`error in send mail confirmation ${error}`)
     }
     res.json({
-      getEmail
+      mess: "pre mail is working"
     })
 
   } catch (error) {
@@ -522,20 +496,57 @@ exports.preMailConfirmation = async (req, res) => {
   }
 }
 
+
+// POST MAIL CONFIRMATION
+exports.postMailConfirmation = async (req, res) => {
+  console.log(req.body);
+  const userPlant = req.body.plant
+  const supplier_number = req.body.supplier_number
+  const getEmail = await User.findOne({
+    where: { plant: plant_op(userPlant) }
+  })
+  if (getEmail) {
+    try {
+      await sendEmail({
+        email: getEmail.email,
+        subject: "MSME Vendor Form",
+        html: '<!DOCTYPE html>' +
+          '<html><head>' +
+          '</head><body><div>' +
+          '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
+          `<p>Dear ${getEmail.username},</p>` +
+          `<p> Vendor Number:<b>${supplier_number}</b> has submitted the form. Please check and review</p>` +
+          `<p>Date:${moment().format('L')}</p>` +
+          `<p>${moment().format('LT')} </p>` +
+          `<i>--- THIS IS AN AUTO GENERATED MAIL ---</i>` +
+          '</div></body></html>',
+      });
+      res.json({
+        mess: `post mail is working and sent to ${getEmail.username}`
+      })
+    } catch (error) {
+      res.status(400).json({
+
+        mess: 'error in send mail confirmation'
+      })
+
+    }
+  }
+
+}
+
+
 //CONVERT VENDOR MASTER TO EXCEL
 exports.vendor_masterToExcel = async (req, res) => {
   const _plant = localStorage.getItem('plant')
   let result = op_plant(_plant)
   let allVendor = await vendor_master.findAll({
+    attributes: { exclude: ['updatedAt', 'createdAt', 'isMSME_flag'] },
     where: {
-      organization: result, delete_flag: false
+      organization: result, delete_flag: false,
     },
   })
-  const jsonVendors = JSON.parse(JSON.stringify(allVendor));
-  const xls = json2xls(jsonVendors);
-  fs.writeFileSync('data.xlsx', xls, 'binary');
-  // res.json({
-  //   res: allVendor.length
-  // })
-  // res.xls('data.xlsx', xls, 'binary')
+  res.json({
+    allVendor
+  })
 }
