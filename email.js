@@ -13,13 +13,13 @@ const sendEmail = async (option) => {
   });
   // console.log(process.env);
   const mailOption = {
-    from: "Sharan Kudtarkar <itpune@adorians.com>",
+    from: "Ador Welding LTD <www.adorwelding.com>",
     to: option.email,
     subject: option.subject,
     text: option.text,
     html: option.html,
     // text: 'For clients with plaintext support only',
-    html: option.html,
+    // html: option.html,
   };
   // console.log(mailOption);
   await transporter.sendMail(mailOption);
