@@ -11,9 +11,9 @@ const sendEmail = async (option) => {
       pass: process.env._PASSWORD,
     },
   });
-  // console.log(process.env);
+
   const mailOption = {
-    from: "Ador Welding LTD <www.adorwelding.com>",
+    from: "Ador Welding LTD <itpune@adorians.com>",
     to: option.email,
     subject: option.subject,
     text: option.text,

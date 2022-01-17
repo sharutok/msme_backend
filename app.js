@@ -12,10 +12,13 @@ require('dotenv').config({
     path: './.env'
 })
 
-// console.log(process.env.HOSTNAME);
 
-app.use(morgan('tiny'))
-app.use(cors());
+app.use(morgan('common'))
+app.use(cors({
+    origin: "http://localhost:3000",
+    optionsSuccessStatus: 200,
+
+}));
 app.use(fileUpload());
 app.use(express.json());
 app.use(cookieParser())

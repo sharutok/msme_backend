@@ -6,7 +6,7 @@ exports.uploadFileImgPost = async (req, res) => {
   const id = req.params.id;
   const arr = [];
   const files = req.files;
-  console.log(files);
+  // console.log(files);  
   Object.values(files).map((e) => {
     arr.push(e)
   });
@@ -74,7 +74,7 @@ exports.uploadFileImgGet = async (req, res) => {
   try {
     const result = await image_uploader.findOne({
       where: { supplier_number: req.params.id },
-      
+
     });
     res.json({
       supplier_number: result.supplier_number,

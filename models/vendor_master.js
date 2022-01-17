@@ -17,10 +17,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       organization: {
+        // unique: true,
         type: DataTypes.STRING,
       },
       supplier_name: {
+        // unique: true,
         type: DataTypes.STRING,
+
       },
       type: {
         type: DataTypes.STRING,
@@ -29,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
       },
       certificate_no: {
+        // unique: true,
         type: DataTypes.STRING,
       },
       certificate_agency: {

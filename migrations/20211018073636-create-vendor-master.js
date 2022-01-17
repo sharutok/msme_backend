@@ -12,9 +12,11 @@ module.exports = {
         type: Sequelize.STRING,
       },
       organization: {
+        // unique: true,
         type: Sequelize.STRING,
       },
       supplier_name: {
+        // unique: true,
         type: Sequelize.STRING,
       },
       type: {
@@ -24,6 +26,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       certificate_no: {
+        // unique: true,
         type: Sequelize.STRING,
       },
       certificate_agency: {
@@ -55,8 +58,8 @@ module.exports = {
       ,
       isMSME_flag: {
         type: Sequelize.STRING,
-        
-        
+
+
       },
       remarks: {
         type: Sequelize.STRING,
