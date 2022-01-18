@@ -440,23 +440,23 @@ exports.showDataOfMSME = async (req, res) => {
 }
 
 function plant_op(op) {
-  if (op === "CD (CHD DEALERS)" || "CE (CHD EQPT)" || "CG (CHD PWRG)" || "CJ (CHD PROJ)" || "CW (CHD WAPS)" || "PE (PMP EQPT)") {
-    return a = "CHD"
+  if (["CD (CHD DEALERS)", "CE (CHD EQPT)", "CG (CHD PWRG)", "CJ (CHD PROJ)", "CW (CHD WAPS)", "PE (PMP EQPT)"].includes(op)) {
+    return "CHD"
   }
-  else if (op === "CC (CHN CONS)") {
-    return b = "CHN"
+  else if (["CC (CHN CONS)"].includes(op)) {
+    return "CHN"
   }
-  else if (op === "HO (HEAD OFFICE)") {
-    return c = "HO"
+  else if (["HO (HEAD OFFICE)"].includes(op)) {
+    return "HO"
   }
-  else if (op === "RC (RPR CONS)") {
-    return d = "RPR"
+  else if (["RC (RPR CONS)"].includes(op)) {
+    return "RPR"
   }
-  else if (op === "SC (SIL CONS)") {
-    return e = "SIL"
+  else if (["SC (SIL CONS)"].includes(op)) {
+    return "SIL"
   }
-  else if (op === "ALL") {
-    return d = null
+  else if (["ALL"].includes(op)) {
+    return 'ALL'
   }
 }
 
@@ -499,13 +499,16 @@ exports.preMailConfirmation = async (req, res) => {
 
 // POST MAIL CONFIRMATION
 exports.postMailConfirmation = async (req, res) => {
-  const link = `http://14.143.203.75:3000/login`
+  // const link = `http://14.143.203.75:3000/login`
+  const link = `http://localhost:3000/login`
   console.log(req.body);
   const userPlant = req.body.plant
   const supplier_number = req.body.supplier_number
+  console.log(userPlant, supplier_number, plant_op(userPlant));
   const getEmail = await User.findOne({
     where: { plant: plant_op(userPlant) }
   })
+  console.log(getEmail.username);
   if (getEmail) {
     try {
       await sendEmail({
