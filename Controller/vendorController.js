@@ -499,6 +499,7 @@ exports.preMailConfirmation = async (req, res) => {
 
 // POST MAIL CONFIRMATION
 exports.postMailConfirmation = async (req, res) => {
+  const link = `http://14.143.203.75:3000/login`
   console.log(req.body);
   const userPlant = req.body.plant
   const supplier_number = req.body.supplier_number
@@ -515,7 +516,7 @@ exports.postMailConfirmation = async (req, res) => {
           '</head><body><div>' +
           '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
           `<p>Dear ${getEmail.username},</p>` +
-          `<p> Vendor Number:<b>${supplier_number}</b> has submitted the form. Please check and review</p>` +
+          `<p> Vendor Number:<b>${supplier_number}</b> has submitted the form. Please check and review <a href="${link}">Click Here!!!!</a></p>` +
           `<p>Date:${moment().format('L')}</p>` +
           `<p>${moment().format('LT')} </p>` +
           `<i>--- THIS IS AN AUTO GENERATED MAIL ---</i>` +
