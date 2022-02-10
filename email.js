@@ -10,16 +10,21 @@ const sendEmail = async (option) => {
       user: process.env._USERNAME,
       pass: process.env._PASSWORD,
     },
+    tls: {
+      ciphers: "SSLv3",
+    },
+    requireTLS: true,
   });
 
+  //TEST
+  // from: "Ador Welding LTD <sharankudtarkar@adorians.com>",
+  //PRODUCTION
   const mailOption = {
-    from: "Ador Welding LTD <itpune@adorians.com>",
+    from: "Finance Desk <financedesk@adorians.com>",
     to: option.email,
     subject: option.subject,
     text: option.text,
     html: option.html,
-    // text: 'For clients with plaintext support only',
-    // html: option.html,
   };
   // console.log(mailOption);
   await transporter.sendMail(mailOption);
