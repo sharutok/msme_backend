@@ -347,8 +347,7 @@ exports.sendEmail = async (req, res) => {
         "<p>Dear Vendor.</p>" +
         `MSME Vendor portal: <a href="${portalLink}">Click Here!!!!</a>` +
         `<p>Your Vendor Number: ${supplier_number}</p>` +
-        `<p>Status: <b>${
-          vendor.status === "0" ? "Pending" : "Approved"
+        `<p>Status: <b>${vendor.status === "0" ? "Pending" : "Approved"
         }</b></p>` +
         `REMARKS: ${vendor.remarks ? vendor.remarks : "none"}` +
         `<p>Date:${moment().format("L")}</p>` +
@@ -562,33 +561,33 @@ exports.postMailConfirmation = async (req, res) => {
   }
 };
 
-//CONVERT VENDOR MASTER TO EXCEL
-// exports.vendor_masterToExcel = async (req, res) => {
-//   const _plant = localStorage.getItem("plant");
-//   let result = op_plant(_plant);
-//   let allVendor = await vendor_master.findAll({
-//     attributes: { exclude: ["updatedAt", "createdAt", "isMSME_flag"] },
-//     where: {
-//       organization: result,
-//       delete_flag: false,
-//     },
-//   });
-//   res.json({
-//     allVendor,
-//   });
-// };
-
 //VENDOR MASTER TO EXCEL FORMAT CONVERSION
 exports.vendor_masterToExcel = async (req, res) => {
   const _plant = localStorage.getItem("plant");
   let result = op_plant(_plant);
-  const allVendor = await vendor_master.sequelize.query(
-    `(select supplier_number,organization,supplier_name,type,created_date,certificate_no,certificate_agency,certificate_expiration_date,certificate_registration_date,vendor_email,remarks, case status when '1' then 'APPROVED' when '0' then 'PENDING' end status from vendor_master where organization = "${result}" )`
-  );
-
-  res.json({
-    allVendor: allVendor[1],
+  const allVendor = await vendor_master.findAll({
+    attributes: [
+      'supplier_number', 'organization', 'supplier_name', 'type', 'created_date', 'certificate_no', 'certificate_agency', 'certificate_expiration_date',
+      'certificate_registration_date', 'vendor_email',
+      [sequelize.literal(`(CASE status WHEN '1' THEN 'YES' ELSE 'NO' END)`), 'isMSME_flag'],
+      [sequelize.literal(`(CASE status WHEN '1' THEN 'APPROVED' ELSE 'PENDING' END)`), 'status'],
+    ],
+    where: {
+      organization: result,
+      delete_flag: false,
+    },
   });
+  try {
+    res.json({
+      allVendor
+    });
+  } catch (error) {
+    console.log("vendor_masterToExcel", error);
+    res.json({
+      mess: "vendor_masterToExcel",
+      error: error
+    })
+  }
 };
 
 //SET MSME FLAG
@@ -654,3 +653,4 @@ exports.postIsMSME = async (req, res) => {
     }
   }
 };
+

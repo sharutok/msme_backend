@@ -15,8 +15,8 @@ require("dotenv").config({
 app.use(morgan("common"));
 app.use(
   cors({
-    // origin: "http://localhost:3000",
-    origin: "http://14.143.203.75:3000",
+    origin: "http://localhost:3000",
+    // origin: "http://14.143.203.75:3000",
     optionsSuccessStatus: 200,
   })
 );

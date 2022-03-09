@@ -13,13 +13,12 @@ const sendEmail = async (option) => {
     tls: {
       ciphers: "SSLv3",
     },
-    requireTLS: true,
   });
 
   //TEST
-  // from: "Ador Welding LTD <sharankudtarkar@adorians.com>",
   //PRODUCTION
   const mailOption = {
+    // from: "Ador Welding LTD <sharankudtarkar@adorians.com>",
     from: "Finance Desk <financedesk@adorians.com>",
     to: option.email,
     subject: option.subject,
