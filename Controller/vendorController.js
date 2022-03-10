@@ -46,11 +46,36 @@ function op_plant(plant) {
   }
 }
 
+function plant_op(op) {
+  if (
+    [
+      "CD (CHD DEALERS)",
+      "CE (CHD EQPT)",
+      "CG (CHD PWRG)",
+      "CJ (CHD PROJ)",
+      "CW (CHD WAPS)",
+      "PE (PMP EQPT)",
+    ].includes(op)
+  ) {
+    return "CHD";
+  } else if (["CC (CHN CONS)"].includes(op)) {
+    return "CHN";
+  } else if (["HO (HEAD OFFICE)"].includes(op)) {
+    return "HO";
+  } else if (["RC (RPR CONS)"].includes(op)) {
+    return "RPR";
+  } else if (["SC (SIL CONS)"].includes(op)) {
+    return "SIL";
+  } else if (["ALL"].includes(op)) {
+    return "ALL";
+  }
+}
+
 let plantValueFromCookie;
 //GET ALL VENDERS
 exports.allVendor = async (req, res) => {
   const { plant } = req.params;
-  // console.log(plant);
+  console.log(plant);
   let result = op_plant(plant);
   localStorage.setItem("plant", plant);
   let allVendor = await vendor_master.findAll({
@@ -275,7 +300,6 @@ exports.vendorStatus = async (req, res) => {
 };
 
 // SMART SEARCH
-
 exports.smartSearch = async (req, res) => {
   const searchVariable = req.params.searchVariable;
   console.log(searchVariable);
@@ -460,30 +484,7 @@ exports.showDataOfMSME = async (req, res) => {
   });
 };
 
-function plant_op(op) {
-  if (
-    [
-      "CD (CHD DEALERS)",
-      "CE (CHD EQPT)",
-      "CG (CHD PWRG)",
-      "CJ (CHD PROJ)",
-      "CW (CHD WAPS)",
-      "PE (PMP EQPT)",
-    ].includes(op)
-  ) {
-    return "CHD";
-  } else if (["CC (CHN CONS)"].includes(op)) {
-    return "CHN";
-  } else if (["HO (HEAD OFFICE)"].includes(op)) {
-    return "HO";
-  } else if (["RC (RPR CONS)"].includes(op)) {
-    return "RPR";
-  } else if (["SC (SIL CONS)"].includes(op)) {
-    return "SIL";
-  } else if (["ALL"].includes(op)) {
-    return "ALL";
-  }
-}
+
 
 // PRE MAIL CONFIRMATION-USER
 exports.preMailConfirmation = async (req, res) => {
