@@ -526,40 +526,44 @@ exports.preMailConfirmation = async (req, res) => {
 exports.postMailConfirmation = async (req, res) => {
   const link = `http://14.143.203.75:3000/login`;
   // const link = `http://localhost:3000/login`
-  console.log(req.body);
+  // console.log(req.body);
   const userPlant = req.body.plant;
   const supplier_number = req.body.supplier_number;
-  console.log(userPlant, supplier_number, plant_op(userPlant));
-  const getEmail = await User.findOne({
-    where: { plant: plant_op(userPlant) },
+  console.log({ userPlant, supplier_number, z: plant_op(userPlant) });
+  const getEmail = await User.findAll({
+    where: { plant: plant_op(userPlant) }, raw: true
   });
-  console.log(getEmail.username);
-  if (getEmail) {
-    try {
-      await sendEmail({
-        email: getEmail.email,
-        subject: "MSME Vendor Form",
-        html:
-          "<!DOCTYPE html>" +
-          "<html><head>" +
-          "</head><body><div>" +
-          '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
-          `<p>Dear ${getEmail.username},</p>` +
-          `<p> Vendor Number:<b>${supplier_number}</b> has submitted the form. Please check and review <a href="${link}">Click Here!!!!</a></p>` +
-          `<p>Date:${moment().format("L")}</p>` +
-          `<p>${moment().format("LT")} </p>` +
-          `<i>--- THIS IS AN AUTO GENERATED MAIL ---</i>` +
-          "</div></body></html>",
-      });
-      res.json({
-        mess: `post mail is working and sent to ${getEmail.username}`,
-      });
-    } catch (error) {
-      res.status(400).json({
-        mess: "error in send mail confirmation",
-      });
+  await getEmail.map(getEmail => {
+    console.log(getEmail.email);
+
+    if (getEmail) {
+      try {
+        sendEmail({
+          email: getEmail.email,
+          subject: "MSME Vendor Form",
+          html:
+            "<!DOCTYPE html>" +
+            "<html><head>" +
+            "</head><body><div>" +
+            '<img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Ador_Welding_logo.png" alt="Ador Logo" width="100" height="50">' +
+            `<p>Dear ${getEmail.username},</p>` +
+            `<p> Vendor Number:<b>${supplier_number}</b> has submitted the form. Please check and review <a href="${link}">Click Here!!!!</a></p>` +
+            `<p>Date:${moment().format("L")}</p>` +
+            `<p>${moment().format("LT")} </p>` +
+            `<i>--- THIS IS AN AUTO GENERATED MAIL ---</i>` +
+            "</div></body></html>",
+        });
+        console.log(`post mail is working and sent to ${getEmail.username}`);
+      } catch (error) {
+        res.status(400).json({
+          mess: "error in send mail confirmation",
+        });
+      }
     }
-  }
+  })
+  res.json({
+    mess: `post mail is working and sent`,
+  });
 };
 
 //VENDOR MASTER TO EXCEL FORMAT CONVERSION
@@ -568,9 +572,11 @@ exports.vendor_masterToExcel = async (req, res) => {
   let result = op_plant(_plant);
   const allVendor = await vendor_master.findAll({
     attributes: [
-      'supplier_number', 'organization', 'supplier_name', 'type', 'created_date', 'certificate_no', 'certificate_agency', 'certificate_expiration_date',
-      'certificate_registration_date', 'vendor_email',
-      [sequelize.literal(`(CASE status WHEN '1' THEN 'YES' ELSE 'NO' END)`), 'isMSME_flag'],
+      ['supplier_number', 'SUPPLIER NUMBER'], ['organization', 'ORGANIZATION'],
+      ['supplier_name', 'SUPPLIER NAME'], ['type', 'TYPE'], ['created_date', 'CREATED DATE'], ['certificate_no', 'MSME NO'],
+      ['certificate_agency', 'CERTIFICATE AGENCY'], ['certificate_expiration_date', 'CERTI EXP DATE'],
+      ['certificate_registration_date', 'CERTI REG DATE'], ['vendor_email', 'VENDOR EMAIL'],
+      // [sequelize.literal(`(CASE status WHEN '1' THEN 'YES' ELSE 'NO' END)`), 'isMSME_flag'],
       [sequelize.literal(`(CASE status WHEN '1' THEN 'APPROVED' ELSE 'PENDING' END)`), 'status'],
     ],
     where: {
@@ -632,7 +638,7 @@ exports.patchIsMSME = async (req, res) => {
   }
 };
 
-//GET VENDOR STATUS-IF MSME OR NOT
+//GET VENDOR STATUS- IF MSME OR NOT
 exports.postIsMSME = async (req, res) => {
   const { supplier_number } = req.body;
   console.log({ supplier_number });
