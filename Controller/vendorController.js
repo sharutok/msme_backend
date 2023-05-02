@@ -371,7 +371,8 @@ exports.sendEmail = async (req, res) => {
         "<p>Dear Vendor.</p>" +
         `MSME Vendor portal: <a href="${portalLink}">Click Here!!!!</a>` +
         `<p>Your Vendor Number: ${supplier_number}</p>` +
-        `<p>Status: <b>${vendor.status === "0" ? "Pending" : "Approved"
+        `<p>Status: <b>${
+          vendor.status === "0" ? "Pending" : "Approved"
         }</b></p>` +
         `REMARKS: ${vendor.remarks ? vendor.remarks : "none"}` +
         `<p>Date:${moment().format("L")}</p>` +
@@ -484,8 +485,6 @@ exports.showDataOfMSME = async (req, res) => {
   });
 };
 
-
-
 // PRE MAIL CONFIRMATION-USER
 exports.preMailConfirmation = async (req, res) => {
   const { vendorNo, plant, user } = req.body;
@@ -524,16 +523,17 @@ exports.preMailConfirmation = async (req, res) => {
 
 // POST MAIL CONFIRMATION-FOR USER
 exports.postMailConfirmation = async (req, res) => {
-  const link = `http://14.143.203.75:3000/login`;
+  const link = `http://27.107.7.11:3000/login`;
   // const link = `http://localhost:3000/login`
   // console.log(req.body);
   const userPlant = req.body.plant;
   const supplier_number = req.body.supplier_number;
   console.log({ userPlant, supplier_number, z: plant_op(userPlant) });
   const getEmail = await User.findAll({
-    where: { plant: plant_op(userPlant) }, raw: true
+    where: { plant: plant_op(userPlant) },
+    raw: true,
   });
-  await getEmail.map(getEmail => {
+  await getEmail.map((getEmail) => {
     console.log(getEmail.email);
 
     if (getEmail) {
@@ -560,7 +560,7 @@ exports.postMailConfirmation = async (req, res) => {
         });
       }
     }
-  })
+  });
   res.json({
     mess: `post mail is working and sent`,
   });
@@ -572,12 +572,23 @@ exports.vendor_masterToExcel = async (req, res) => {
   let result = op_plant(_plant);
   const allVendor = await vendor_master.findAll({
     attributes: [
-      ['supplier_number', 'SUPPLIER NUMBER'], ['organization', 'ORGANIZATION'],
-      ['supplier_name', 'SUPPLIER NAME'], ['type', 'TYPE'], ['created_date', 'CREATED DATE'], ['certificate_no', 'MSME NO'],
-      ['certificate_agency', 'CERTIFICATE AGENCY'], ['certificate_expiration_date', 'CERTI EXP DATE'],
-      ['certificate_registration_date', 'CERTI REG DATE'], ['vendor_email', 'VENDOR EMAIL'],
+      ["supplier_number", "SUPPLIER NUMBER"],
+      ["organization", "ORGANIZATION"],
+      ["supplier_name", "SUPPLIER NAME"],
+      ["type", "TYPE"],
+      ["created_date", "CREATED DATE"],
+      ["certificate_no", "MSME NO"],
+      ["certificate_agency", "CERTIFICATE AGENCY"],
+      ["certificate_expiration_date", "CERTI EXP DATE"],
+      ["certificate_registration_date", "CERTI REG DATE"],
+      ["vendor_email", "VENDOR EMAIL"],
       // [sequelize.literal(`(CASE status WHEN '1' THEN 'YES' ELSE 'NO' END)`), 'isMSME_flag'],
-      [sequelize.literal(`(CASE status WHEN '1' THEN 'APPROVED' ELSE 'PENDING' END)`), 'status'],
+      [
+        sequelize.literal(
+          `(CASE status WHEN '1' THEN 'APPROVED' ELSE 'PENDING' END)`
+        ),
+        "status",
+      ],
     ],
     where: {
       organization: result,
@@ -586,14 +597,14 @@ exports.vendor_masterToExcel = async (req, res) => {
   });
   try {
     res.json({
-      allVendor
+      allVendor,
     });
   } catch (error) {
     console.log("vendor_masterToExcel", error);
     res.json({
       mess: "vendor_masterToExcel",
-      error: error
-    })
+      error: error,
+    });
   }
 };
 
@@ -660,4 +671,3 @@ exports.postIsMSME = async (req, res) => {
     }
   }
 };
-

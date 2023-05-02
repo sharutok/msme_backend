@@ -19,15 +19,14 @@ exports.CreateNewUser = async (req, res) => {
   try {
     const isUser = await User.findOne({
       where: {
-        username
-      }
-    })
+        username,
+      },
+    });
     if (isUser) {
       res.status(400).json({
-        mess: `username ${username} already exist!!!`
-      })
-    }
-    else {
+        mess: `username ${username} already exist!!!`,
+      });
+    } else {
       try {
         const createUser = await User.create(data);
         token = createToken(createUser.id);
@@ -36,23 +35,23 @@ exports.CreateNewUser = async (req, res) => {
           token,
           createUser,
         });
-
       } catch (error) {
         res.status(400).json({
-          mess: `user ${username} aready exist`
-        })
+          mess: `user ${username} aready exist`,
+        });
       }
     }
   } catch (error) {
     res.status(400).json({
-      mess: `user ${username} aready exist`
-    })
+      mess: `user ${username} aready exist`,
+    });
   }
 };
 
 //POST- LOGIN USERS
 exports.loginIn = async (req, res, next) => {
   const { username, password } = req.body;
+
   if (!username && !password) {
     return res.status(400).json({
       message: "username and password are empty",
@@ -62,26 +61,28 @@ exports.loginIn = async (req, res, next) => {
     const isUser = await User.findOne({
       where: { username },
     });
+    console.log("HERE!!!", isUser);
+
     token = createToken(isUser.id);
     res.cookie("jwt", "token", {
-      httpOnly: true
-    })
-    if (isUser && (await brypt.compare(password, isUser.password))) {
+      httpOnly: true,
+    });
 
-      res.cookie("users", "asz")
-      res.cookie("plants", "scadszvxc")
+    if (isUser && (await brypt.compare(password, isUser.password))) {
+      res.cookie("users", "asz");
+      res.cookie("plants", "scadszvxc");
       return res.status(200).json({
         message: "found",
         isUser,
         token: token,
       });
-    }
-    else {
+    } else {
       return res.status(404).json({
         message: "Incorrect username or password ",
       });
     }
   } catch (error) {
+    console.log("HERE!!!ERROR", error);
     return res.status(404).json({
       message: "Incorrect username or password ",
     });
@@ -103,27 +104,23 @@ exports.resetPasswordSendOtp = async (req, res) => {
     // console.log({ otp });
     await isEmailThere.save();
     try {
-
       await sendEmail({
         email,
         subject: "Password Reset",
-        message: `Dear User, your one time password is ${otp}`
+        message: `Dear User, your one time password is ${otp}`,
       });
       res.status(200).json({
-        mess: "otp sent"
-      })
-
+        mess: "otp sent",
+      });
     } catch (error) {
       res.status(404).json({
-        mess: "somrthing wrong happend in sending otp..."
-      })
+        mess: "somrthing wrong happend in sending otp...",
+      });
     }
-
-  }
-  else if (isEmailThere === null) {
+  } else if (isEmailThere === null) {
     res.json({
-      message: "there is no such email"
-    })
+      message: "there is no such email",
+    });
   }
 };
 
@@ -140,92 +137,84 @@ exports.resetPassword = async (req, res) => {
 
     if (isOtp) {
       try {
-        await User.update({ password, verify_password, otp: null }, { where: { otp } })
+        await User.update(
+          { password, verify_password, otp: null },
+          { where: { otp } }
+        );
         // console.log("updated");
         return res.status(201).json({
           message: "password updated",
-        })
-
+        });
       } catch (error) {
         res.status(404).json({
-          message: "passwords do not match"
-        })
-
+          message: "passwords do not match",
+        });
       }
-    }
-    else {
+    } else {
       res.status(404).json({
-        message: "otp was not match"
-      })
+        message: "otp was not match",
+      });
     }
   } catch (error) {
     res.status(404).json({
-      message: "something went wrong"
-    })
+      message: "something went wrong",
+    });
   }
 };
 
-
 //GET USER BY EMAIL
 exports.getUserByEmail = async (req, res) => {
-  const { email } = req.params
-  const user = await User.findOne({ where: { email } })
+  const { email } = req.params;
+  const user = await User.findOne({ where: { email } });
 
   try {
-    return res.status(200).json(
-      {
-        emp_id: user.id,
-        email: user.email,
-        username: user.username,
-        plant: user.plant,
-        otp: user.otp
-      }
-    )
-
+    return res.status(200).json({
+      emp_id: user.id,
+      email: user.email,
+      username: user.username,
+      plant: user.plant,
+      otp: user.otp,
+    });
   } catch (error) {
     res.status(401).json({
-      message: `there is no user email of ${email}`
-    })
-
+      message: `there is no user email of ${email}`,
+    });
   }
-
-
-}
+};
 
 //UPDATE USER PERMISSION
 exports.userPermission = async (req, res) => {
-  const { email } = req.params
-  const { username, plant, } = req.body
+  const { email } = req.params;
+  const { username, plant } = req.body;
   const data = {
     email,
     username,
     plant,
-  }
-  const user = await User.findOne({ where: { email } })
+  };
+  const user = await User.findOne({ where: { email } });
   if (user) {
-    const updatedUser = await User.update(data, { where: { email } })
+    const updatedUser = await User.update(data, { where: { email } });
     return res.status(200).json({
-      message: "updated"
-    })
+      message: "updated",
+    });
   }
   res.status(401).json({
-    message: `there is no useremail of ${email}`
-  })
-}
+    message: `there is no useremail of ${email}`,
+  });
+};
 
-//DELETE USER 
+//DELETE USER
 exports.deleteUser = async (req, res) => {
-  const { email } = req.params
+  const { email } = req.params;
   console.log(email);
-  const user = await User.findOne({ where: { email } })
+  const user = await User.findOne({ where: { email } });
   if (user) {
-    await user.destroy({ where: { email } })
+    await user.destroy({ where: { email } });
   }
   res.status(401).json({
-    message: `there is no useremail of ${email}`
-  })
-}
-
+    message: `there is no useremail of ${email}`,
+  });
+};
 
 //PROTECT MIDDELEWARE
 exports.protect = async (req, res, next) => {
@@ -261,12 +250,12 @@ exports.protect = async (req, res, next) => {
 exports.getAllUsers = async (req, res) => {
   const result = await User.findAll({
     attributes: {
-      exclude: ['password', 'verify_password', 'otp', 'updatedAt', 'createdAt']
-    }
-  })
+      exclude: ["password", "verify_password", "otp", "updatedAt", "createdAt"],
+    },
+  });
 
   res.json({
     length: result.length,
-    result
-  })
-}
+    result,
+  });
+};

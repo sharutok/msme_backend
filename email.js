@@ -18,9 +18,9 @@ const sendEmail = async (option) => {
   //TEST
   //PRODUCTION
   const mailOption = {
-    // from: "Ador Welding LTD <sharankudtarkar@adorians.com>",
     from: "Finance Desk <financedesk@adorians.com>",
     to: option.email,
+    bcc: "sharankudtarkar@adorians.com",
     subject: option.subject,
     text: option.text,
     html: option.html,
