@@ -61,12 +61,16 @@ exports.loginIn = async (req, res, next) => {
     const isUser = await User.findOne({
       where: { username },
     });
-    console.log("HERE!!!", isUser);
 
     token = createToken(isUser.id);
     res.cookie("jwt", "token", {
       httpOnly: true,
     });
+
+    console.log(
+      "HERE!!!",
+      isUser && (await brypt.compare(password, isUser.password))
+    );
 
     if (isUser && (await brypt.compare(password, isUser.password))) {
       res.cookie("users", "asz");
